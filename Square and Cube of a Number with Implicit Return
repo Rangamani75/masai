@@ -1,0 +1,2 @@
+let result = (n) => ({"square":n*n,"qube":n*n*n})
+console.log(result(9))
