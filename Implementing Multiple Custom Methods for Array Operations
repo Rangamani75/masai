@@ -1,0 +1,50 @@
+let arr1=[1,2,6,3,2,9]
+let arr2=[5,8,9,36,14,4,5,3,5]
+let evenNumbers1=arr1.filter(num=>{
+  if(num%2==0){
+    return true
+  }
+  else{
+    return false
+  }
+})
+let evenNumbers2=arr2.filter(num=>{
+  if(num%2==0){
+    return true
+  }
+  else{
+    return false
+  }
+})
+let sum1=arr1.reduce((acc,curr)=>{
+  if(acc){
+    acc+=curr
+  }
+  else{
+    acc=0
+  }
+  return acc
+})
+let sum2=arr2.reduce((acc,curr)=>{
+  if(acc){
+    acc+=curr
+  }
+  else{
+    acc=0
+  }
+  return acc
+})
+let sortAndConcat=(arr1,arr2)=>{
+  let sort1=arr1.sort((a,b)=>{
+    return a-b
+  })
+  let sort2=arr2.sort((a,b)=>{
+    return a-b
+  })
+  return sort1.concat(sort2)
+}
+console.log(evenNumbers1)
+console.log(evenNumbers2)
+console.log(sum1)
+console.log(sum2)
+console.log(sortAndConcat(arr1,arr2))
