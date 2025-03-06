@@ -1,0 +1,6 @@
+function extractAndReverse(arr){
+  let x = arr.slice(2,5)
+  console.log(x.reverse())
+}
+arr=[15, 30, 45, 60, 75, 90]
+extractAndReverse(arr)
