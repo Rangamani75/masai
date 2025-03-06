@@ -1,0 +1,4 @@
+let multiply=(num,arr)=>{
+  return num*arr
+}
+console.log(multiply.apply(null,[8,2]))
