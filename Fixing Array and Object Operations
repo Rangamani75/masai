@@ -1,0 +1,33 @@
+const library = {
+    books: [{ title: "The Hobbit", author: "J.R.R. Tolkien", year: 1937 }],
+    addBook(book) {
+        if (!book.title || !book.author || !book.year) {
+            console.error("Error: Book information is incomplete."); return;
+        }
+        if (this.books.some(existingBook => existingBook.title === book.title)) {
+            console.error(`Error: A book with the title "${book.title}" already exists.`); return;
+        }
+        this.books.push(book);
+        console.log(`Success: Book "${book.title}" added.`);
+    },
+    findBookByTitle(title) {
+        const book = this.books.find(book => book.title === title);
+        if (!book) {
+            console.error(`Error: Book titled "${title}" not found.`); return null;
+        }
+        return book;
+    },
+    removeBook(title) {
+        const index = this.books.findIndex(book => book.title === title);
+        if (index !== -1) {
+            console.log(`Success: Book "${this.books.splice(index, 1)[0].title}" removed.`);
+        } else {
+            console.error(`Error: Book titled "${title}" not found.`);
+        }
+    }
+};
+
+library.addBook({ title: "1984", author: "George Orwell", year: 1949 });
+library.addBook({ author: "Harper Lee", year: 1960 });
+library.addBook({ title: "The Hobbit", author: "J.R.R. Tolkien", year: 1937 });
+console.log(library.books.length);
