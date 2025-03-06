@@ -1,0 +1,10 @@
+let info={ 
+  name: "Alice", 
+  hobbies: ["reading", "traveling"] 
+}
+
+console.log("Original :",info)
+let json_info=JSON.stringify(info)
+let parse_info=JSON.parse(json_info)
+parse_info.hobbies.push("coding")
+console.log("Clone :",parse_info)
