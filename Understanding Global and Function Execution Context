@@ -1,0 +1,12 @@
+let age = 45; // Global variable
+function displayAge() {
+    console.log(`Age: ${age}`); 
+    function changeAge() {
+    age = 54;
+    console.log(`Age updated to: ${age}`);
+}
+changeAge()
+
+}
+
+displayAge();  
