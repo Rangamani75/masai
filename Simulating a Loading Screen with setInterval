@@ -1,0 +1,11 @@
+let count = 0
+let logging = setInterval(() => {
+  console.log("Logging")
+  count=count+1
+  if(count===5){
+    console.log("Logged successful")
+    clearInterval(logging)
+   
+  
+  }
+},1000) 
