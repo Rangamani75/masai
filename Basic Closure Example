@@ -1,0 +1,9 @@
+function outerFunction(){
+  let message = "Hii I am Closure"
+  function innerFunction(){
+    return message
+  }
+  return innerFunction
+}
+let x = outerFunction()
+console.log(x())
