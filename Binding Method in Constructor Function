@@ -1,0 +1,11 @@
+unction Person(name,age){
+  this.age=age
+  this.name=name
+  this.displayInfo=function(){
+    console.log(`${this.name} is ${this.age} years old`)
+  }
+}
+
+const person1=new Person("pavan",21)
+const display=person1.displayInfo.bind(person1)
+display()
