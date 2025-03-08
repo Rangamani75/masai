@@ -1,0 +1,7 @@
+let products=[{ name: "Laptop", price: 1000 }, { name: "Mouse", price: 20 }]
+let product_names=products.map(product=> product.name)
+console.log(product_names)
+products.forEach(product=>{
+  let messege = product.price>50 ? `${product.name} is above $50` : `${product.name} is below $50`
+  console.log(messege)
+})
