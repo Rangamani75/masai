@@ -1,0 +1,14 @@
+let count=parseInt(prompt("enter seconds : "))
+if(isNaN(count) || count<=0){
+  console.log("enter valid count for timer.")
+}
+else{
+  let countdown=setInterval(function() {
+    console.log(`Time remaining :${count} seconds`)
+    count--
+    if(count===0){
+      clearInterval(countdown)
+      console.log("Countdown Complete!")
+    }
+  }, 1000);
+}
