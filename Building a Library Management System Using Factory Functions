@@ -1,0 +1,56 @@
+function book(title,author){
+  return {
+    title:title,
+    author:author,
+    details(){
+      console.log(`${title} by ${author}`)
+    }
+  }
+}
+
+function createLibrary(){
+  let books=[]
+  return {
+    addBook(book){
+      books.push(book)
+      console.log(`${book.title} added`)
+    },
+    removeBook(title){
+      if(books.length==0){
+        console.log("Library is empty.")
+      }
+      else{
+        let index=books.findIndex(book=> book.title==title)
+        if(index!=-1){
+          books.splice(index,1)
+          console.log(`${title} removed from library`)
+        }
+        else{
+          console.log(`No book found with the name ${title}`)
+        }
+      }
+    },
+    getdetails(){
+      if(books.length==0){
+        console.log("Library is empty.")
+      }
+      else{
+        console.log("Books in Library : ")
+        books.forEach(book=> book.details())
+      }
+    }
+  }
+}
+
+let Library=createLibrary()
+let book1=book("KINGSTON","pavan")
+let book2=book("KINGDOM","vijay")
+let book3=book("PARADISE","nani")
+let book4=book("KALKI","prabhas")
+Library.addBook(book1)
+Library.addBook(book2)
+Library.addBook(book3)
+Library.addBook(book4)
+Library.getdetails()
+Library.removeBook("KINGSTON")
+Library.getdetails()
