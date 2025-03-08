@@ -1,0 +1,7 @@
+let categories = ["electronics", "clothing", "electronics", "toys", "clothing", "toys", "toys"]
+let frequency = categories.reduce((acc,cat)=>{
+  acc[cat]=(acc[cat] || 0)+1
+  return acc
+},{});
+let sorted=Object.entries(frequency).sort((a,b)=>b[1]-a[1])
+console.log(sorted)
