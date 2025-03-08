@@ -1,0 +1,53 @@
+let library = [];
+let processLibrary = () => {
+  return {
+    addBook: (book) => {
+      library.push(book)
+      console.log(book,"book added to the library")
+    },
+    removeBook: (book) => {
+      let index = library.indexOf(book);
+      if (index !== -1) {
+        library.splice(index, 1);
+      }
+    },
+    search: (book)=>{
+      if(library.includes(book)){
+        console.log(book,"found at index",library.indexOf(book))
+      }
+      else{
+        console.log("book not found")
+      }
+    },
+    occurance: (book)=>{
+      console.log("the first and last occurance of",book,"is",library.indexOf(book),"and",library.lastIndexOf(book))
+    },
+    sublist: (start,end)=>{
+      console.log(library.slice(start,end))
+    },
+    sorting: (library)=>{
+      console.log("sorted library :",library.sort((a,b)=>a.localeCompare(b)))
+    },
+    replace: (start,num)=>{
+      console.log(library.splice(start,num))
+      console.log(num,"book(s) removed from library")
+    },
+    joining: ()=>{
+      console.log(library.join(","))
+    },
+    getBooks: () => [...library]
+  };
+};
+let user = processLibrary();
+user.addBook("Atomic Habits");
+user.addBook("Rich dad vs poor dad");
+user.addBook("Time");
+user.addBook("Rich dad vs poor dad");
+user.addBook("positive thought");
+user.search("Atomic Habits");
+user.occurance("positive thought")
+user.sublist(0,1)
+user.sorting(library)
+user.replace(1,1)
+user.joining()
+console.log(user.getBooks())
