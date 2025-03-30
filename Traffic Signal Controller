@@ -1,0 +1,17 @@
+function trafficSignal(callback){
+    let colors=['red','green','yellow'];
+    let cycles=0
+    let colorIndex = 0
+    let interval = setInterval(function(){
+        callback(colors[colorIndex])
+        colorIndex=(colorIndex+1)%colors.length
+        cycles++
+        if(cycles==3){
+            clearInterval(interval)
+            
+        }
+    },4000)  
+}
+trafficSignal((color)=>{
+    console.log(`Light is now: ${color}`)
+})
