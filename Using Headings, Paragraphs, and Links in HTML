@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Page</title>
+</head>
+<body>
+<h1>Welcome to My Web Page</h1>
+<p>Above line is written in h1</p>
+<h2>This is h2 tag</h2>
+<p>Above line font size is smaller comapare with h1</p>
+<h1>This is h3 tag</h1>
+<p>Above line font size is smaller compare with h2</p> 
+<a href="C:\Users\Admin\OneDrive\Desktop\winword\notepad\Heading 1.docx">This is a link for more information</a>              
+</body>
+</html>
