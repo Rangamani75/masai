@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How the internat works</title>
+    <style>
+        #heading {
+            color: red;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 3em;
+            background-color: aqua;
+            width:600px;
+            margin: auto;
+
+        }
+        .client {
+            color: blue;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 2em;
+            background-color: lightgreen;
+            width: 450px;
+           
+        }
+    </style>
+</head>
+<body>
+    <h1 id="heading">How The internet works</h1>
+    <section class="client">Client & Server communication</section>
+    <h2>How a web request works</h2>
+    <ol>
+        <li>The user, through a web browser, enters a URL into the address bar or clicks a link. </li>
+        <li>The browser recognizes the "http" or "https" part of the URL, indicating the Hypertext Transfer Protocol should be used. </li>
+        <li>The browser needs to find the server's IP address, so it uses a DNS (Domain Name System) server to resolve the domain name (e.g., google.com) to its corresponding IP address. </li>
+        <li>The browser uses TCP/IP to establish a connection with the server at the identified IP address. </li>
+        <li>The browser sends an HTTP request to the server over the established TCP connection. </li>
+        <li>The server receives the request and processes it to determine what to send back. </li>
+        <li>The server receives the request and processes it to determine what to send back. </li>
+        <li>The browser receives the HTTP response and renders the content, displaying it to the user. </li>
+    </ol>
+    <h3>
+        Fundamental protocols of the internet:
+    </h3>
+    <ul>
+        <li>HTTP (Hypertext Transfer Protocol): The protocol used for transferring web pages on the internet.</li>
+        <li>HTTPS (HTTP Secure): A secure version of HTTP that encrypts data between the client and server.</li>
+        <li>TCP/IP (Transmission Control Protocol/Internet Protocol): The fundamental communication protocols of the internet.</li>
+        <li>DNS (Domain Name System): The system that translates domain names into IP addresses.</li>
+        <li>FTP (File Transfer Protocol): A protocol used for transferring files between computers on a network.</li>
+        <li>SMTP (Simple Mail Transfer Protocol): The protocol used for sending emails.</li>
+
+    </ul>
+    <h2 style="color:crimson;background-color:rgb(212, 224, 43); width: 200px;text-align: center;margin-left: 30%;">Client vs Server</h3>
+    <table border="1" cellpadding="10" cellspacing="0" style="width: 80%; margin-top: 20px; text-align: center;">
+        <tr>
+            <th>function</th>
+            <th>Client</th>
+            <th>Server</th>
+        </tr>
+        <tr>
+            <td>Requests resources</td>
+            <td>Initiates requests for resources or services.</td>
+            <td>Responds to requests from clients and provides resources or services.</td>
+        </tr>
+        <tr>
+            <td>Processes data locally</td>
+            <td>Typically runs on a user's device (e.g., web browser, mobile app).</td>
+            <td>Runs on a remote machine (e.g., web server, database server).</td>
+        </tr>
+        <tr>
+            <td>Interacts with the user</td>
+            <td>Examples: Web browsers, email clients, mobile apps.</td>
+            <td>Examples: Web servers, database servers, application servers.</td>
+        </tr>
+        <tr>
+            <td>Handles user input</td>
+            <td>Requests data or services from the server.</td>
+            <td>Processes requests and sends back the requested data or services.</td>
+    </table>
+    <h2 style="color:crimson;background-color:rgb(212, 224, 43); width: 350px;text-align: center;margin-left: 25%;">Static vs Dynamic Features</h3>
+        <table border="1" cellpadding="10" cellspacing="0" style="width: 80%; margin-top: 20px; text-align: center;">
+        <tr>
+            <th>Feature</th>
+            <th>Static</th> 
+
+            <th>Dynamic</th>
+        </tr>
+        <tr>    
+            <td>Definition</td>
+            <td>Content that does not change or is fixed.</td>
+
+            <td>Content that can change or is generated dynamically.</td>
+        </tr>
+        <tr>
+            <td>Examples</td>
+            <td>HTML pages, images, CSS files.</td>
+            <td>Web applications, user-generated content, databases.</td>
+        </tr>
+        <tr>
+
+            <td>Interactivity</td>
+            <td>Limited interactivity; users cannot modify the content.</td>
+
+            <td>Highly interactive; users can modify or interact with the content.</td>
+        </tr>
+        <tr>
+            <td>Loading time</td>
+            <td>Generally faster loading times as content is pre-built.</td>
+            <td>May have slower loading times due to server-side processing.</td>
+        </tr>
+        <tr>
+            <td>Server-side processing</td>
+            <td>No server-side processing required; content is served as-is.</td>
+            <td>Requires server-side processing to generate content based on user input or other factors.</td>
+        </tr>
+        
+            </table>
+    <h2 style="color: deeppink;background-color: aqua;width: 350px; margin-left: 200px;text-align: center;">How the client-Server Interacts</h2>
+    <div style="display: flex; width: 100%;margin-bottom: 20px;">
+        <div style="width: 700px;">
+        <img src="data:image/jpeg;base64,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" alt="Client-Server Interaction" style="width: 500px; height: 300px; margin-left: 20%;">
+        </div>
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/qcALGDn0zpk?si=IJi0DyxcSccqd1M2" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>YouTube video link</iframe>
+    
+</div>
+<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2255.0946266060246!2d9.364083376870811!3d55.582960773021746!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x464b63d430a0ead5%3A0x337c76bc2a2cf91b!2sData%20Center%20Map%20ApS!5e0!3m2!1sen!2sin!4v1744528069638!5m2!1sen!2sin" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+ <form>
+     what is client side scripting language?
+     <input type="text" name="client_side_scripting_language" id="client_side_scripting_language" placeholder="Enter your answer here">
+        <br><br>
+        what is server side scripting language?
+        <input type="text" name="server_side_scripting_language" id="server_side_scripting_language" placeholder="Enter your answer here">
+        <br><br>
+        what is the difference between client side and server side scripting language?
+        <input type="text" name="difference_between_client_side_and_server_side_scripting_language" id="difference_between_client_side_and_server_side_scripting_language" placeholder="Enter your answer here">
+        <br><br>
+        what is the difference between client side and server side scripting language?
+        <input type="text" name="difference_between_client_side_and_server_side_scripting_language" id="difference_between_client_side_and_server_side_scripting_language" placeholder="Enter your answer here">
+        <br><br>
+ </form>   
+</body>
+</html>
