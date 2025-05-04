@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <input type="text" id="colorname" placeholder="color name">
+    <input type="text" id="textcontent" placeholder="text content">
+    <button id="btn" onclick="changebackground()">Change Background</button>
+    <button id="btn" onclick="updatetext()">updatetext</button>
+</body>
+</html>
+<script>
+    function changebackground() {
+        let color = document.getElementById('colorname').value;
+        if(color == "") {
+            alert("Please enter a color name");
+            return;
+        }
+        
+        let div = document.createElement('div');
+        document.body.style.backgroundColor = color;
+    }
+
+    function updatetext() {
+        let text = document.getElementById('textcontent').value;
+        if(text == "") {
+            alert("Please enter a text");
+            return;
+        }
+        let ptag = document.createElement('p');
+        ptag.innerText = text;
+        document.body.appendChild(ptag);
+    }
+    // let x = document.getElementById('ptag').innerText    
+</script>
