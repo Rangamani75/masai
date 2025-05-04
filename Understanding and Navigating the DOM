@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1 id="id">"hello" </h1>
+    <p>My name is rangamani</p>
+    <p>I am from AP</p>
+    <div class="cl">Hiii</div>
+    <div class="cl">Hello</div>
+    <div class="cl">Rangamani</div>
+
+</body>
+</html>
+<script>
+    let x  = document.getElementById('id')
+    x.textContent = "Welcome to DOM"
+    let pi = document.getElementsByTagName('p')
+    for(let i=0;i<pi.length;i++){
+        pi[i].style.color="blue"
+    }
+    let div = document.querySelector(".cl")
+    div.style.backgroundColor="red"
+    
+</script>
