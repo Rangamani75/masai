@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .container{
+            width: 100%;
+            height: 150px;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="h1">Hello Ranga</h1>
+    <p>para1</p>
+    <p>para2</p>
+    <p>para3</p>
+    <div class="container">Hello</div>
+</body>
+</html>
+<script>
+let x = document.getElementById('h1')
+x.textContent="Welcome to the DOM World!"
+let p = document.getElementsByTagName('p')
+for(let i of p){
+    i.style.color="blue"
+}
+let z = document.querySelector('.container')
+z.style.backgroundColor="yellow"
+
+
+
+
+
+</script>
