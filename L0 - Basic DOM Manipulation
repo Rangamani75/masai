@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <ul>
+        <!-- <li></li>
+        <li></li>
+        <li></li> -->
+    </ul>
+    <button type="button" style="background-color: red;" onclick="clicking()">Add Item</button>
+</body>
+</html>
+<script>
+    let c=0
+    function clicking(){
+        c=c+1
+    let container = document.querySelector('ul')
+    let li = document.createElement('li')
+    li.innerText="New Item"
+    container.appendChild(li)
+    if(c%2===0){
+        li.style.color="blue"
+    }
+    else{
+        li.style.color="red"
+        li.style.fontStyle = "Italic";
+    }
+    }
+</script>
