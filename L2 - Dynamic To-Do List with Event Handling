@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <input type="text" placeholder="Enter Task" id="input text">
+    <button type="button" style="background-color: red;" onclick="Add()">Add Task</button>
+    <ul id="task"> </ul>
+    <button onclick="dele()">Delete</button>
+    <button>Complete</button>
+    
+</body>
+</html>
+<script>
+    function Add(){
+        let input_Text = document.getElementById("input text")
+        let tasks=document.getElementById("task")
+        let li=document.createElement("li")
+        li.innerText=input_Text.value
+        tasks.append(li)
+
+    }
+    function dele(){
+        let tasks=document.getElementById("task")
+        if (tasks.lastChild) {
+        tasks.removeChild(tasks.lastChild);
+    } else {
+        alert("No tasks to delete.");
+    }
+
+    }
+
+</script>
