@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <input type="text"  id="color" placeholder="Enter Color Name">
+    <input type="text"  id="text" placeholder="textContent">
+    <button type="button" id="BackGrounColor" style="background-color: red;" onclick="bgc()">Change BackGrounColor</button>
+    <button type="button" id="Update Text" style="background-color: red;" onclick="update()">Update Text</button>
+    <div id="div">Hello This is mani</div>
+</body>
+</html>
+<script>
+    function bgc(){
+        
+    
+        let col=document.getElementById('color')
+        let y = col.value.trim()
+         let x = document.createElement('div')
+         x.style.backgroundColor=y
+        if(col.value===''){
+        alert("Please enter color")
+    }
+   
+    else if( x.style.backgroundColor===""){
+          alert("Please enter valid color")
+    }
+    else if(col.value!=''){
+        let div = document.getElementById("div")
+        div.style.backgroundColor=col.value
+    }
+
+    }
+    function update(){
+        let text = document.getElementById('text')
+        if(text.value===''){
+            alert("Please enter Some Text")
+        }
+        else{
+           let div = document.getElementById("div")
+           div.innerText=text.value 
+        }
+    }
+    
+</script>
