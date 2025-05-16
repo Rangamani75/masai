@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Task List</title>
+</head>
+<body>
+  <input id="taskInput" type="text" placeholder="Enter task">
+  <button id="addTask">Add Task</button>
+  <ul id="taskList"></ul> <!-- Fixed this too: remove 'Task List' from inside ul -->
+
+  <script>
+    const addTaskButton = document.getElementById('addTask');
+    const taskInput = document.getElementById('taskInput');
+    const taskList = document.getElementById('taskList');
+
+    addTaskButton.onclick = function () {
+      const taskText = taskInput.value.trim();
+      if (taskText === '') return; // prevent empty tasks
+
+      const newTask = document.createElement('li');
+      newTask.innerText = taskText;
+      taskList.appendChild(newTask);
+      taskInput.value = ''; // clear input
+    };
+
+    taskList.onclick = function (e) {
+      if (e.target.tagName === 'LI') {
+        e.target.remove();
+      }
+    };
+  </script>
+</body>
+</html>
