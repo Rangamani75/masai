@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        div#container{
+            display: grid;
+            grid-template-columns: repeat(3,1fr);            
+            width:90%;
+            margin:20px;
+            text-align: center;
+            gap:20x;
+        }
+        div>div{
+            margin:20px;
+        }
+    </style>
+</head>
+<body>
+   <div id="container"></div> 
+</body>
+</html>
+<script>
+    const products = [
+  { id: 1, name: "Product A", price: 50, inStock: true },
+  { id: 2, name: "Product B", price: 30, inStock: false },
+  { id: 3, name: "Product C", price: 70, inStock: true },
+  { id: 4, name: "Product D", price: 20, inStock: false }
+];
+let container = document.getElementById("container")
+products.forEach((ele)=>{
+    let div = document.createElement('div')
+    let h3 = document.createElement("h3")
+    h3.innerText=ele.name 
+    let p = document.createElement("p")
+    p.innerText=ele.price 
+    div.append(h3,p)
+    ele.inStock===true?div.style.backgroundColor="green": div.style.backgroundColor="red"
+    container.appendChild(div)
+})
+</script>
