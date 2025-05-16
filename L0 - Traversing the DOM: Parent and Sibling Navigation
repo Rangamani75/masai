@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+        <div id="container">
+        <ul id="list">
+            <li id="item1">Item 1</li>
+            <li id="item2" onclick="dispaly()">Item 2</li>
+            <li id="item3">Item 3</li>
+        </ul>
+        </div> 
+</body>
+</html>
+<script>
+function dispaly() {
+    let ul = document.getElementById("list")
+    alert(ul.textContent)
+    let i2 = document.getElementById("item2")
+    let prev = i2.previousElementSibling.textContent
+    console.log(prev)
+    let after = i2.nextElementSibling.textContent
+    console.log(after)
+    
+}
+</script>
