@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <textarea id="txt" placeholder="Type Something..."></textarea>
+  <div id="save"></div>
+  <button onclick="saveNote()">Save Note</button>
+  <button onclick="display()">Load Notes</button>
+  <button onclick="clear()">Clear Notes</button>
+</body>
+</html>
+<script>
+  function saveNote(){
+    let text=document.getElementById('txt').value
+    localStorage.setItem("text",JSON.stringify(text))
+    alert("Note Saved!")
+  }
+  function display(){
+    let save=document.getElementById('save')
+    let text=JSON.parse(localStorage.getItem('text'))
+    let p=document.createElement('p')
+    p.textContent=text
+    save.appendChild(p)
+  }
+  function clear(){
+    localStorage.removeItem("text");
+    document.getElementById("txt").value = "";
+    document.getElementById("save").innerHTML = "";
+    alert("Note Cleared!");
+  }
+</script>
