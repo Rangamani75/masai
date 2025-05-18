@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Enhanced Todo List</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 600px;
+    margin: 30px auto;
+  }
+  h1 {
+    text-align: center;
+  }
+  #taskInput, #searchInput {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    font-size: 16px;
+    box-sizing: border-box;
+  }
+  ul {
+    list-style: none;
+    padding-left: 0;
+  }
+  li {
+    background: #f4f4f4;
+    margin: 8px 0;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 5px;
+  }
+  li.completed span {
+    text-decoration: line-through;
+    color: gray;
+  }
+  button.delete-btn {
+    background: #e74c3c;
+    border: none;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  button.delete-btn:hover {
+    background: #c0392b;
+  }
+  label {
+    flex-grow: 1;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<h1>Enhanced Todo List</h1>
+
+<input type="text" id="taskInput" placeholder="Add a new task and press Enter..." />
+<input type="text" id="searchInput" placeholder="Search tasks..." />
+
+<ul id="taskList"></ul>
+
+<script>
+  // Utility function to generate unique IDs
+  function generateId() {
+    return '_' + Math.random().toString(36).substr(2, 9);
+  }
+
+  // Load tasks from localStorage or initialize empty array
+  let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+  const taskInput = document.getElementById('taskInput');
+  const searchInput = document.getElementById('searchInput');
+  const taskList = document.getElementById('taskList');
+
+  // Save tasks to localStorage
+  function saveTasks() {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+  }
+
+  // Render tasks based on current array and search filter
+  function renderTasks(filter = '') {
+    taskList.innerHTML = '';
+    const filteredTasks = tasks.filter(task => 
+      task.text.toLowerCase().includes(filter.toLowerCase())
+    );
+
+    filteredTasks.forEach(task => {
+      const li = document.createElement('li');
+      li.className = task.completed ? 'completed' : '';
+
+      // Checkbox to mark complete
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = task.completed;
+      checkbox.style.marginRight = '10px';
+      checkbox.addEventListener('change', () => {
+        task.completed = checkbox.checked;
+        saveTasks();
+        renderTasks(searchInput.value);
+      });
+
+      // Task text
+      const span = document.createElement('span');
+      span.textContent = task.text;
+
+      // Label for accessibility & click toggle
+      const label = document.createElement('label');
+      label.appendChild(checkbox);
+      label.appendChild(span);
+      label.style.display = 'flex';
+      label.style.alignItems = 'center';
+      label.style.flexGrow = '1';
+
+      // Delete button
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = 'Delete';
+      deleteBtn.className = 'delete-btn';
+      deleteBtn.addEventListener('click', () => {
+        tasks = tasks.filter(t => t.id !== task.id);
+        saveTasks();
+        renderTasks(searchInput.value);
+      });
+
+      li.appendChild(label);
+      li.appendChild(deleteBtn);
+      taskList.appendChild(li);
+    });
+  }
+
+  // Add new task on Enter key press
+  taskInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && taskInput.value.trim() !== '') {
+      tasks.push({
+        id: generateId(),
+        text: taskInput.value.trim(),
+        completed: false
+      });
+      taskInput.value = '';
+      saveTasks();
+      renderTasks(searchInput.value);
+    }
+  });
+
+  // Search input realtime filter
+  searchInput.addEventListener('input', e => {
+    renderTasks(e.target.value);
+  });
+
+  // Initial render
+  renderTasks();
+</script>
+
+</body>
+</html>
