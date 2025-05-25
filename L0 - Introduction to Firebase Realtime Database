@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Firebase User List</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      max-width: 800px;
+      margin: auto;
+    }
+    h2 {
+      text-align: center;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 12px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    .error {
+      color: red;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>User List from Firebase</h2>
+  <div id="error" class="error"></div>
+
+  <table id="userTable" style="display: none;">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const firebaseUrl = 'https://YOUR_FIREBASE_PROJECT_URL.firebaseio.com/users.json'; // 🔁 Replace with your URL
+    const errorDiv = document.getElementById('error');
+    const userTable = document.getElementById('userTable');
+    const tbody = userTable.querySelector('tbody');
+
+    async function fetchUsers() {
+      try {
+        const response = await fetch(firebaseUrl);
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch data from Firebase');
+        }
+
+        const data = await response.json();
+
+        if (!data) {
+          errorDiv.textContent = 'No users found.';
+          return;
+        }
+
+        Object.values(data).forEach(user => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${user.name}</td>
+            <td>${user.email}</td>
+          `;
+          tbody.appendChild(row);
+        });
+
+        userTable.style.display = 'table';
+      } catch (error) {
+        errorDiv.textContent = 'Error: ' + error.message;
+      }
+    }
+
+    fetchUsers();
+  </script>
+
+</body>
+</html>
