@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Feedback Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 500px;
+      margin: auto;
+      padding: 30px;
+    }
+    h2 {
+      text-align: center;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    input, textarea {
+      padding: 10px;
+      font-size: 14px;
+    }
+    button {
+      padding: 10px;
+      font-size: 16px;
+      background: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .message {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    .success {
+      color: green;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Submit Your Feedback</h2>
+
+  <form id="feedbackForm">
+    <input type="text" id="username" placeholder="Your Name" required />
+    <textarea id="message" placeholder="Your Feedback" required></textarea>
+    <button type="submit">Submit Feedback</button>
+  </form>
+
+  <div id="responseMessage" class="message"></div>
+
+  <script>
+    const form = document.getElementById('feedbackForm');
+    const messageDiv = document.getElementById('responseMessage');
+    const firebaseUrl = 'https://YOUR_FIREBASE_PROJECT_ID.firebaseio.com/feedback.json'; // 🔁 Replace this
+
+    form.addEventListener('submit', async function(event) {
+      event.preventDefault();
+      messageDiv.textContent = '';
+      messageDiv.className = 'message';
+
+      const username = document.getElementById('username').value.trim();
+      const message = document.getElementById('message').value.trim();
+
+      if (!username || !message) {
+        messageDiv.textContent = 'Please fill in all fields.';
+        messageDiv.classList.add('error');
+        return;
+      }
+
+      const feedback = {
+        username,
+        message,
+        timestamp: new Date().toISOString()
+      };
+
+      try {
+        const response = await fetch(firebaseUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(feedback)
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to submit feedback.');
+        }
+
+        messageDiv.textContent = 'Feedback submitted successfully!';
+        messageDiv.classList.add('success');
+        form.reset();
+      } catch (error) {
+        messageDiv.textContent = 'Error: ' + error.message;
+        messageDiv.classList.add('error');
+      }
+    });
+  </script>
+
+</body>
+</html>
