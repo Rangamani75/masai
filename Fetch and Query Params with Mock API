@@ -1,0 +1,113 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Product Search Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .filters {
+      margin-bottom: 20px;
+    }
+    .filters input,
+    .filters select,
+    .filters button {
+      margin-right: 10px;
+      padding: 8px;
+      font-size: 14px;
+    }
+    .message {
+      margin: 20px 0;
+      font-weight: bold;
+    }
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+    }
+    .product-card {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+    }
+    .product-card img {
+      max-width: 100%;
+      height: 150px;
+      object-fit: contain;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Product Search</h2>
+
+  <div class="filters">
+    <select id="category">
+      <option value="electronics">Electronics</option>
+      <option value="clothing">Clothing</option>
+      <option value="books">Books</option>
+    </select>
+
+    <input type="number" id="minPrice" placeholder="Min Price" />
+    <input type="number" id="maxPrice" placeholder="Max Price" />
+
+    <button onclick="searchProducts()">Search</button>
+  </div>
+
+  <div id="message" class="message"></div>
+  <div id="productList" class="product-grid"></div>
+
+  <script>
+    async function searchProducts() {
+      const category = document.getElementById("category").value;
+      const minPrice = document.getElementById("minPrice").value;
+      const maxPrice = document.getElementById("maxPrice").value;
+      const messageDiv = document.getElementById("message");
+      const productList = document.getElementById("productList");
+
+      // Reset messages and product list
+      messageDiv.textContent = "Loading...";
+      productList.innerHTML = "";
+
+      // Construct dynamic URL
+      const baseURL = "https://mockapi.io/products";
+      const url = `${baseURL}/category-${category}&min_price-${minPrice}&max_price-${maxPrice}5sort-asc`;
+
+      try {
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch products");
+        }
+
+        const products = await response.json();
+
+        if (products.length === 0) {
+          messageDiv.textContent = "No products found.";
+          return;
+        }
+
+        messageDiv.textContent = `Found ${products.length} products`;
+
+        products.forEach(product => {
+          const card = document.createElement("div");
+          card.className = "product-card";
+          card.innerHTML = `
+            <img src="${product.image || 'https://via.placeholder.com/150'}" alt="${product.name}" />
+            <h4>${product.name}</h4>
+            <p>Price: ₹${product.price}</p>
+          `;
+          productList.appendChild(card);
+        });
+      } catch (error) {
+        messageDiv.textContent = "Error: " + error.message;
+      }
+    }
+  </script>
+
+</body>
+</html>
