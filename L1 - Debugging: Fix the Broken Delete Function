@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Firebase User Manager</title>
+  <style>
+    table, th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h2>User List</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="user-table">
+      <!-- Users will be inserted here -->
+    </tbody>
+  </table>
+
+  <script>
+    const firebaseURL = "https://your-project-id.firebaseio.com/users"; 
+    async function fetchUsers() {
+      try {
+        const res = await fetch(`${firebaseURL}.json`);
+        const data = await res.json();
+
+        const tableBody = document.getElementById("user-table");
+        tableBody.innerHTML = "";
+
+        for (let key in data) {
+          const user = data[key];
+          const row = document.createElement("tr");
+          row.id = key; // important for delete function
+
+          row.innerHTML = `
+            <td>${user.name}</td>
+            <td>${user.email}</td>
+            <td><button onclick="deleteUser('${key}')">Delete</button></td>
+          `;
+
+          tableBody.appendChild(row);
+        }
+      } catch (error) {
+        console.error("Failed to fetch users:", error);
+      }
+    }
+
+    // Delete a user from Firebase and UI
+    const deleteUser = async (key) => {
+      try {
+        const res = await fetch(`${firebaseURL}/${key}.json`, {
+          method: 'DELETE',
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed to delete user");
+        }
+
+        console.log("User deleted successfully");
+
+        // Remove row from UI
+        const row = document.getElementById(key);
+        if (row) row.remove();
+
+      } catch (error) {
+        console.error("Error deleting user:", error);
+      }
+    };
+
+    // Load users on page load
+    fetchUsers();
+  </script>
+</body>
+</html>
