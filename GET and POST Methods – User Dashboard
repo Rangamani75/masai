@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      max-width: 700px;
+      margin: auto;
+    }
+    h2 {
+      text-align: center;
+    }
+    form {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    input {
+      padding: 10px;
+      flex: 1;
+      font-size: 14px;
+    }
+    button {
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .message {
+      margin: 10px 0;
+      font-weight: bold;
+    }
+    .success {
+      color: green;
+    }
+    .error {
+      color: red;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    li {
+      background: #f2f2f2;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>User Dashboard</h2>
+
+  <form id="userForm">
+    <input type="text" id="name" placeholder="Full Name" required />
+    <input type="email" id="email" placeholder="Email" required />
+    <button type="submit">Add User</button>
+  </form>
+
+  <div id="message" class="message"></div>
+
+  <h3>Registered Users</h3>
+  <ul id="userList"></ul>
+
+  <script>
+    const API_URL = "https://mockapi.io/users"; // Replace with a working mock API for real testing
+
+    const userList = document.getElementById("userList");
+    const userForm = document.getElementById("userForm");
+    const messageDiv = document.getElementById("message");
+
+    let users = []; // Local array to hold current users
+
+    // Fetch users and display
+    async function fetchUsers() {
+      try {
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error("Failed to fetch users");
+        users = await res.json();
+        renderUsers();
+      } catch (error) {
+        messageDiv.textContent = "Error: " + error.message;
+        messageDiv.className = "message error";
+      }
+    }
+
+    // Render user list
+    function renderUsers() {
+      userList.innerHTML = "";
+      users.forEach(user => {
+        const li = document.createElement("li");
+        li.innerHTML = `<strong>${user.name}</strong><br>${user.email}`;
+        userList.appendChild(li);
+      });
+    }
+
+    // Handle form submission
+    userForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+
+      // Reset messages
+      messageDiv.textContent = "";
+      messageDiv.className = "message";
+
+      // Validate
+      if (!name || !email) {
+        messageDiv.textContent = "Please fill all fields.";
+        messageDiv.classList.add("error");
+        return;
+      }
+
+      // Check for duplicate email
+      const emailExists = users.some(u => u.email.toLowerCase() === email.toLowerCase());
+      if (emailExists) {
+        messageDiv.textContent = "Email already exists.";
+        messageDiv.classList.add("error");
+        return;
+      }
+
+      // Send POST request
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ name, email })
+        });
+
+        if (!res.ok) throw new Error("Failed to add user");
+        const newUser = await res.json();
+        users.push(newUser); // Add to local list
+        renderUsers(); // Re-render list
+        messageDiv.textContent = "User added successfully!";
+        messageDiv.classList.add("success");
+        userForm.reset();
+      } catch (error) {
+        messageDiv.textContent = "Error: " + error.message;
+        messageDiv.classList.add("error");
+      }
+    });
+
+    // Initial fetch
+    fetchUsers();
+  </script>
+
+</body>
+</html>
