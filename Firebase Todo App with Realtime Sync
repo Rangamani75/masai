@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Meme Catalog with Firebase Favorites</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    .controls { margin-bottom: 20px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
+    .meme { border: 2px solid #ccc; padding: 10px; text-align: center; border-radius: 5px; position: relative; }
+    .favorite { border-color: gold; }
+    .badge { position: absolute; top: 5px; right: 5px; background: gold; padding: 4px 6px; border-radius: 4px; font-size: 12px; }
+    img { max-width: 100%; height: auto; border-radius: 4px; }
+    input, select { margin-right: 10px; padding: 5px; }
+    button { padding: 6px 10px; margin-right: 10px; }
+  </style>
+</head>
+<body>
+  <h2>Meme Catalog</h2>
+
+  <div class="controls">
+    <button onclick="fetchMemes()">Fetch Memes</button>
+    <input type="text" id="search" placeholder="Search memes" oninput="handleSearch()" />
+    <select id="sort" onchange="handleSort()">
+      <option value="">Sort By</option>
+      <option value="name">Name</option>
+      <option value="width">Width</option>
+      <option value="height">Height</option>
+    </select>
+    <label><input type="checkbox" id="showFavoritesOnly" onchange="renderMemes()" /> Show Favorites Only</label>
+  </div>
+
+  <div class="grid" id="memeGrid"></div>
+
+  <script>
+    const API_URL = "https://api.imgflip.com/get_memes";
+    const FIREBASE_URL = "https://creating-movie-default-rtdb.asia-southeast1.firebasedatabase.app/favorites";
+    let allMemes = [];
+    let favoriteIds = [];
+
+    function fetchMemes() {
+      fetch(API_URL)
+        .then(res => res.json())
+        .then(data => {
+          allMemes = data.data.memes;
+          fetchFavorites();
+        });
+    }
+
+    function fetchFavorites() {
+      fetch(`${FIREBASE_URL}.json`)
+        .then(res => res.json())
+        .then(data => {
+          favoriteIds = data ? Object.keys(data) : [];
+          renderMemes();
+        });
+    }
+
+    function isFavorite(id) {
+      return favoriteIds.includes(id);
+    }
+
+    function toggleFavorite(id, meme) {
+      if (isFavorite(id)) {
+        fetch(`${FIREBASE_URL}/${id}.json`, { method: "DELETE" })
+          .then(() => {
+            favoriteIds = favoriteIds.filter(favId => favId !== id);
+            renderMemes();
+          });
+      } else {
+        fetch(`${FIREBASE_URL}/${id}.json`, {
+          method: "PUT",
+          body: JSON.stringify(meme),
+          headers: { "Content-Type": "application/json" }
+        })
+          .then(() => {
+            favoriteIds.push(id);
+            renderMemes();
+          });
+      }
+    }
+
+    function handleSearch() {
+      renderMemes();
+    }
+
+    function handleSort() {
+      renderMemes();
+    }
+
+    function renderMemes() {
+      const container = document.getElementById("memeGrid");
+      const searchVal = document.getElementById("search").value.trim().toLowerCase();
+      const sortVal = document.getElementById("sort").value;
+      const showFavOnly = document.getElementById("showFavoritesOnly").checked;
+
+      let filtered = allMemes.filter(meme => 
+        meme.name.toLowerCase().includes(searchVal) &&
+        (!showFavOnly || isFavorite(meme.id))
+      );
+
+      if (sortVal === "name") {
+        filtered.sort((a, b) => a.name.localeCompare(b.name));
+      } else if (sortVal === "width") {
+        filtered.sort((a, b) => b.width - a.width);
+      } else if (sortVal === "height") {
+        filtered.sort((a, b) => b.height - a.height);
+      }
+
+      container.innerHTML = "";
+      filtered.forEach(meme => {
+        const div = document.createElement("div");
+        div.className = "meme" + (isFavorite(meme.id) ? " favorite" : "");
+        div.innerHTML = `
+          ${isFavorite(meme.id) ? '<div class="badge">★</div>' : ''}
+          <img src="${meme.url}" alt="${meme.name}" />
+          <p>${meme.name}</p>
+          <button onclick="toggleFavorite('${meme.id}', ${JSON.stringify(meme).replace(/"/g, '&quot;')})">
+            ${isFavorite(meme.id) ? "Remove Favorite" : "Add to Favorites"}
+          </button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    window.onload = fetchMemes;
+  </script>
+</body>
+</html>
