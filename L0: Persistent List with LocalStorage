@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Item List App</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    ul { padding-left: 20px; }
+    li { margin: 5px 0; }
+    #message { color: gray; }
+  </style>
+</head>
+<body>
+  <h2>My Item List</h2>
+  <input type="text" id="itemInput" placeholder="Enter item" />
+  <button onclick="addItem()">Add</button>
+  <button onclick="clearAll()">Clear All</button>
+  <p id="message"></p>
+  <ul id="itemList"></ul>
+
+  <script>
+    const storageKey = "itemListApp";
+    let items = [];
+
+    function loadItems() {
+      const stored = localStorage.getItem(storageKey);
+      if (stored) items = JSON.parse(stored);
+      renderList();
+    }
+
+    function saveItems() {
+      localStorage.setItem(storageKey, JSON.stringify(items));
+    }
+
+    function addItem() {
+      const input = document.getElementById("itemInput");
+      const value = input.value.trim();
+      if (value) {
+        items.push(value);
+        saveItems();
+        renderList();
+        input.value = "";
+      }
+    }
+
+    function clearAll() {
+      items = [];
+      saveItems();
+      renderList();
+    }
+
+    function renderList() {
+      const list = document.getElementById("itemList");
+      const message = document.getElementById("message");
+      list.innerHTML = "";
+
+      if (items.length === 0) {
+        message.innerText = "No items added yet";
+        return;
+      }
+
+      message.innerText = "";
+      items.forEach(item => {
+        const li = document.createElement("li");
+        li.innerText = item;
+        list.appendChild(li);
+      });
+    }
+
+    loadItems();
+  </script>
+</body>
+</html>
