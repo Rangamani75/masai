@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Multi-User Shopping Cart</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    table, th, td { border: 1px solid black; border-collapse: collapse; padding: 8px; }
+    input[type="number"] { width: 50px; }
+  </style>
+</head>
+<body>
+  <h2>Login</h2>
+  <input type="text" id="usernameInput" placeholder="Enter unique username" />
+  <button onclick="login()">Login</button>
+  <p id="loginStatus"></p>
+
+  <div id="cartSection" style="display:none;">
+    <h2>Shopping Cart for <span id="currentUser"></span></h2>
+
+    <h3>Add Item</h3>
+    <input type="text" id="itemName" placeholder="Item Name" />
+    <input type="number" id="itemPrice" placeholder="Price" />
+    <input type="number" id="itemQty" placeholder="Quantity" />
+    <button onclick="addItem()">Add to Cart</button>
+
+    <h3>Cart Items</h3>
+    <table id="cartTable">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Price</th>
+          <th>Quantity</th>
+          <th>Total</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <h3>Total Cost: $<span id="totalCost">0</span></h3>
+  </div>
+
+  <script>
+    let currentUser = null;
+    const storageKey = "multiUserCart";
+
+    function login() {
+      const username = document.getElementById("usernameInput").value.trim();
+      if (!username) {
+        alert("Username cannot be empty.");
+        return;
+      }
+
+      currentUser = username;
+      document.getElementById("currentUser").innerText = currentUser;
+      document.getElementById("cartSection").style.display = "block";
+      document.getElementById("loginStatus").innerText = `Logged in as ${username}`;
+
+      const data = getCartData();
+      if (!data[username]) {
+        data[username] = [];
+        saveCartData(data);
+      }
+      renderCart();
+    }
+
+    function getCartData() {
+      const raw = localStorage.getItem(storageKey);
+      return raw ? JSON.parse(raw) : {};
+    }
+
+    function saveCartData(data) {
+      localStorage.setItem(storageKey, JSON.stringify(data));
+    }
+
+    function renderCart() {
+      const data = getCartData();
+      const cart = data[currentUser];
+      const tbody = document.querySelector("#cartTable tbody");
+      tbody.innerHTML = "";
+      let total = 0;
+
+      cart.forEach((item, index) => {
+        const row = document.createElement("tr");
+
+        const nameCell = document.createElement("td");
+        nameCell.innerText = item.itemName;
+
+        const priceCell = document.createElement("td");
+        priceCell.innerText = `$${item.price}`;
+
+        const qtyCell = document.createElement("td");
+        const qtyInput = document.createElement("input");
+        qtyInput.type = "number";
+        qtyInput.value = item.quantity;
+        qtyInput.min = 1;
+        qtyInput.onchange = () => updateQuantity(index, qtyInput.value);
+        qtyCell.appendChild(qtyInput);
+
+        const totalCell = document.createElement("td");
+        const itemTotal = item.price * item.quantity;
+        total += itemTotal;
+        totalCell.innerText = `$${itemTotal}`;
+
+        const actionsCell = document.createElement("td");
+        const removeBtn = document.createElement("button");
+        removeBtn.innerText = "Remove";
+        removeBtn.onclick = () => removeItem(index);
+        actionsCell.appendChild(removeBtn);
+
+        row.appendChild(nameCell);
+        row.appendChild(priceCell);
+        row.appendChild(qtyCell);
+        row.appendChild(totalCell);
+        row.appendChild(actionsCell);
+        tbody.appendChild(row);
+      });
+
+      document.getElementById("totalCost").innerText = total;
+    }
+
+    function addItem() {
+      const name = document.getElementById("itemName").value.trim();
+      const p
