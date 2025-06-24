@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Product List</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+    .card { border: 1px solid #ccc; padding: 15px; border-radius: 5px; text-align: center; background: #f9f9f9; }
+    .card img { max-width: 100%; height: 150px; object-fit: contain; }
+    .title { font-size: 16px; margin: 10px 0; height: 40px; overflow: hidden; }
+    .price { font-weight: bold; margin-bottom: 10px; }
+    button { padding: 8px 12px; }
+    .error { color: red; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h2>Product Listing</h2>
+  <div id="errorMsg" class="error"></div>
+  <div id="productGrid" class="grid"></div>
+
+  <script>
+    async function fetchProducts() {
+      const grid = document.getElementById("productGrid");
+      const error = document.getElementById("errorMsg");
+
+      try {
+        const res = await fetch("https://fakestoreapi.com/products");
+        if (!res.ok) throw new Error("Network response was not ok");
+        const data = await res.json();
+        data.forEach(product => {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = `
+            <img src="${product.image}" alt="${product.title}" />
+            <div class="title">${product.title}</div>
+            <div class="price">$${product.price}</div>
+            <button>View Details</button>
+          `;
+          grid.appendChild(card);
+        });
+      } catch (err) {
+        error.innerText = "Failed to fetch products. Please try again later.";
+      }
+    }
+
+    fetchProducts();
+  </script>
+</body>
+</html>
