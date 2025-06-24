@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fetch Users</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    ul { list-style: none; padding: 0; }
+    li { padding: 8px; cursor: pointer; border-bottom: 1px solid #ccc; }
+    li:hover { background-color: #f0f0f0; }
+  </style>
+</head>
+<body>
+  <h2>User List</h2>
+  <ul id="userList"></ul>
+
+  <script>
+    fetch("https://jsonplaceholder.typicode.com/users")
+      .then(res => res.json())
+      .then(data => {
+        const list = document.getElementById("userList");
+        data.forEach(user => {
+          const li = document.createElement("li");
+          li.innerText = user.name;
+          li.onclick = () => alert(user.email);
+          list.appendChild(li);
+        });
+      });
+  </script>
+</body>
+</html>
