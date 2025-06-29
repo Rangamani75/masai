@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1 style="color: red;">User Registration Form</h1>
+    <input type="text" id="name" placeholder="name" required>
+    <input type="email" id="email" placeholder="email" required>
+    <input type="password" id="password" placeholder="password" required>
+    <button type="button" style="background-color: aqua;" onclick="registration()">Register</button>
+</body>
+</html>
+<script>
+    async function registration() {
+        let names = document.getElementById("name").value.trim();
+        let emails = document.getElementById("email").value.trim();
+        let passwords = document.getElementById("password").value;
+
+        if (names === "" || !(emails.endsWith("@gmail.com")) || passwords.length < 8) {
+            alert("Please enter correct details");
+        } else {
+            let obj = {
+                name: names,
+                email: emails,
+                password: passwords
+            };
+
+            try {
+                let res = await fetch("https://685c0e3e89952852c2dc0bdf.mockapi.io/users", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(obj)
+                });
+
+                let data = await res.json();
+                console.log(data);
+                alert("Registration successful!");
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Registration failed!");
+            }
+        }
+    }
+</script>
