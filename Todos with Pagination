@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todos with Pagination</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    .todo { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+    .pagination button { margin: 2px; padding: 5px 10px; }
+  </style>
+</head>
+<body>
+  <h1>Todos with Pagination</h1>
+  <div id="todoList"></div>
+  <div class="pagination" id="paginationButtons"></div>
+
+  <script src="main.js"></script>
+</body>
+</html>
