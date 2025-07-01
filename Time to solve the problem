@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Library Management System</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f4f4f4; }
+    .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; }
+    input, select, button { margin: 5px; padding: 10px; }
+    .book, .member { border-bottom: 1px solid #ccc; padding: 10px 0; }
+    .pagination { margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Library Management</h1>
+
+    <!-- Filters -->
+    <div>
+      <label>Genre:</label>
+      <select id="genreFilter">
+        <option value="">All</option>
+        <option value="Science Fiction">Science Fiction</option>
+        <option value="Dystopian">Dystopian</option>
+      </select>
+      <label>Sort By:</label>
+      <select id="sortBooks">
+        <option value="title">Title</option>
+        <option value="author">Author</option>
+        <option value="publishedYear">Year</option>
+      </select>
+      <button onclick="loadBooks()">Apply</button>
+    </div>
+
+    <!-- Book List -->
+    <div id="bookList"></div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+      <button onclick="prevPage()">Prev</button>
+      <span id="pageNum">1</span>
+      <button onclick="nextPage()">Next</button>
+    </div>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>
