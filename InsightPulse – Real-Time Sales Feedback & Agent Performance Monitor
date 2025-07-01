@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        h1{
+            color: red;
+            text-align: center;
+        }
+        .agent{
+            background-color: #2196f3;
+            color: white;
+            padding: 15px;
+            margin-right: 10px;
+        }
+        .lead {
+            background-color:pink;
+            color: white;
+            padding: 15px;
+        }
+        #roleSelector{
+            text-align: center;
+        }
+        
+    </style>
+</head>
+<body>
+    <h1>Welcome to InsightPulse</h1>
+    <div id="roleSelector">
+    <h2>Select your role:</h2>
+    <button class="agent" onclick="agent()">Agent</button>
+    <button class="lead" onclick="lead()">Lead</button>
+    <div id="feedbackSubmission"></div>
+  </div>
+</body>
+</html>
+<script>
+    function agent() {
+    localStorage.setItem("userRole", "agent"); 
+
+    let  formHTML = `
+      <h2>Feedback Submission Form</h2>
+      <form id="feedbackForm">
+        <label>Agent Name:</label><br />
+        <input type="text" id="agentName"  required/><br /><br />
+
+        <label>Client Company:</label><br />
+        <input type="text" id="clientCompany" required /><br /><br />
+
+        <label>Department:</label><br />
+        <select id="department">
+          <option value="SaaS">SaaS</option>
+          <option value="Hardware">Hardware</option>
+          <option value="Consulting">Consulting</option>
+          <option value="Other">Other</option>
+        </select><br /><br />
+
+        <label>Satisfaction Score (1-5):</label><br />
+        <input type="number" id="score" min="1" max="5"  required /><br /><br />
+
+        <label>NPS (-100 to 100):</label><br />
+        <input type="number" id="nps" min="-100" max="100" /><br /><br />
+
+        <label>Comment:</label><br />
+        <textarea id="comment" rows="4" cols="40"></textarea><br /><br />
+
+        <button type="submit" onclick="submit()">Submit</button>
+        // <div id="error" style="color: red; margin-top: 10px;"></div>
+        // <div id="success" style="color: green; margin-top: 10px;"></div>
+      </form>
+    `;
+
+    document.getElementById("feedbackSubmission").innerHTML = formHTML;
+    
+
+    }
+  
+</script>
