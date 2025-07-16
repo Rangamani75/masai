@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Item Tracker</title>
+  <style>
+    body {
+      background-color: #b6b2b4;
+      text-align: center;
+      padding: 20px;
+    }
+    input, select, button {
+      margin: 5px;
+      padding: 8px;
+      font-size: 16px;
+    }
+    .itemCard {
+      border: 1px solid #999;
+      padding: 10px;
+      background: #fff;
+      margin: 10px auto;
+      width: 250px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .trash {
+      cursor: pointer;
+      color: red;
+      font-size: 20px;
+    }
+    .filters button {
+      margin: 5px;
+      padding: 8px 12px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h2>Item Database</h2>
+
+  <input type="text" id="name" placeholder="Item Name" />
+  <input type="number" id="qty" placeholder="Qty" min="1" />
+  <input type="number" id="price" placeholder="Price ₹" min="0" step="0.01" />
+  <select id="category">
+    <option value="">Select Category</option>
+    <option value="Grocery">Grocery</option>
+    <option value="Electronics">Electronics</option>
+    <option value="Clothing">Clothing</option>
+  </select>
+  <button onclick="addItem()">Add Item</button>
+
+  
+
+  <div class="filters">
+    <button onclick="applyFilter('All')">All</button>
+    <button onclick="applyFilter('Grocery')">Grocery</button>
+    <button onclick="applyFilter('Electronics')">Electronics</button>
+    <button onclick="applyFilter('Clothing')">Clothing</button>
+  </div>
+
+  <h3>Item List</h3>
+  <div id="container"></div>
+  <div id="totals">
+    <h4>Total Items: <span id="itemCount">0</span> | Grand Cost: ₹<span id="grandTotal">0.00</span></h4>
+  </div>
+
+  <script>
+    const DB_URL = 'https://grocery-a7667-default-rtdb.asia-southeast1.firebasedatabase.app/items.json';
+
+    let allItems = [];
+
+    async function addItem() {
+      const item = {
+        name: document.getElementById('name').value.trim(),
+        qty: parseInt(document.getElementById('qty').value),
+        price: parseFloat(document.getElementById('price').value),
+        category: document.getElementById('category').value
+      };
+
+      if (!item.name || item.qty < 1 || item.price < 0 || !item.category) {
+        alert("Please fill valid item details");
+        return;
+      }
+
+      if (!navigator.onLine) {
+        const pending = JSON.parse(localStorage.getItem('pending') || '[]');
+        pending.push(item);
+        localStorage.setItem('pending', JSON.stringify(pending));
+        alert("Offline: Item saved locally.");
+      } else {
+        await fetch(DB_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(item)
+        });
+        fetchItems(); 
+      }
+
+      document.getElementById('name').value = "";
+      document.getElementById('qty').value = "";
+      document.getElementById('price').value = "";
+      document.getElementById('category').value = "";
+      document.getElementById('name').focus();
+    }
+
+    async function fetchItems() {
+      let res = await fetch(DB_URL);
+      let data = await res.json();
+      allItems = [];
+
+      if (data) {
+        for (let id in data) {
+          allItems.push({ id, ...data[id] });
+        }
+      }
+
+      renderItems(allItems);
+    }
+
+    function renderItems(items) {
+      const container = document.getElementById('container');
+      container.innerHTML = "";
+
+      items.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'itemCard';
+        card.innerHTML = `
+          <span>${item.name} × ${item.qty} — ₹${item.price}</span>
+          <button type="button"><span class="trash" onclick="deleteItem('${item.id}')">DELETE</span></button>
+        `;
+        container.appendChild(card);
+      });
+
+      updateTotals(items);
+    }
+
+    function updateTotals(items) {
+      const totalItems = items.length;
+      const grandTotal = items.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+      document.getElementById('itemCount').innerText = totalItems;
+      document.getElementById('grandTotal').innerText = grandTotal.toFixed(2);
+    }
+
+    function applyFilter(category) {
+      if (category === 'All') {
+        renderItems(allItems);
+      } else {
+        const filtered = allItems.filter(item => item.category === category);
+        renderItems(filtered);
+      }
+    }
+
+    async function deleteItem(id) {
+      await fetch(`https://grocery-a7667-default-rtdb.asia-southeast1.firebasedatabase.app/items/${id}.json`, {
+        method: 'DELETE'
+      });
+      fetchItems();
+    }
+
+    fetchItems();
+  </script>
+</body>
+</html>
