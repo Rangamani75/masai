@@ -1,0 +1,142 @@
+:root {
+    --primary: #6a5acd;
+    --primary-dark: #483d8b;
+    --accent: #00bcd4;
+    --background: #f0f4f8;
+    --white: #ffffff;
+    --text: #333;
+  }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--background);
+    margin: 0;
+    padding: 0;
+    color: var(--text);
+  }
+
+  nav {
+    background-color: var(--primary);
+    color: var(--white);
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 1.8rem;
+  }
+
+  main {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 30px 16px;
+    min-height: calc(100vh - 64px);
+  }
+
+  section {
+    background-color: var(--white);
+    border-radius: 12px;
+    padding: 32px;
+    max-width: 640px;
+    width: 100%;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+    margin-bottom: 30px;
+  }
+
+  section h2 {
+    text-align: center;
+    color: var(--primary-dark);
+    margin-bottom: 24px;
+  }
+
+  input[type="email"],
+  input[type="password"],
+  input[type="text"],
+  input[type="number"],
+  input[type="date"] {
+    width: 100%;
+    margin-bottom: 16px;
+    padding: 12px 14px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+  }
+
+  input:focus {
+    border-color: var(--accent);
+    outline: none;
+  }
+
+  button {
+    display: inline-block;
+    background-color: var(--primary);
+    color: var(--white);
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-right: 10px;
+    margin-top: 8px;
+    transition: background-color 0.3s ease;
+  }
+
+  button:hover {
+    background-color: var(--primary-dark);
+  }
+
+  #logout-btn {
+    background: #ef4444;
+  }
+
+  #logout-btn:hover {
+    background: #dc2626;
+  }
+
+  #dashboard-section > div:first-of-type {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+    justify-content: center;
+  }
+
+  #dashboard-content {
+    margin-top: 20px;
+  }
+
+  .opportunity,
+  .impact-report,
+  .hours-log,
+  .group-section {
+    background: #f9f9fb;
+    padding: 16px;
+    margin-bottom: 20px;
+    border-left: 5px solid var(--accent);
+    border-radius: 8px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+  }
+
+  #auth-msg {
+    color: #dc2626;
+    text-align: center;
+    margin-top: 12px;
+    font-weight: 500;
+  }
+
+  form {
+    margin-top: 12px;
+  }
+
+  #user-email {
+    font-size: 1rem;
+    font-weight: 500;
+    margin-right: 16px;
+  }
