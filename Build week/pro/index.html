@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Volunteer Opportunities Hub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="volunteer.css" />
+
+</head>
+
+<body>
+  <nav>
+    <h1>Volunteer Opportunities Hub</h1>
+    <div id="user-section">
+      <span id="user-email"></span>
+      <button id="logout-btn" style="display:none;">Logout</button>
+    </div>
+  </nav>
+  <main>
+    <section id="auth-section">
+      <h2>Login / Register</h2>
+      <input type="email" id="email" placeholder="Email">
+      <input type="password" id="password" placeholder="Password">
+      <button id="login-btn">Login</button>
+      <button id="register-btn">Register</button>
+      <div id="auth-msg"></div>
+    </section>
+
+    <section id="dashboard-section" style="display:none;">
+      <h2>Welcome, <span id="dash-user"></span>!</h2>
+      <div>
+        <button id="view-impact-btn">My Impact</button>
+        <button id="find-opportunities-btn">Find Opportunities</button>
+        <button id="log-hours-btn">Log Hours</button>
+        <button id="group-coordination-btn">Group Volunteering</button>
+      </div>
+      <div id="dashboard-content"></div>
+    </section>
+  </main>  
+</body>
+</html>
+<script type="module" src="./volunteer.js"></script>
