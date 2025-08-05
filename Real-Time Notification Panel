@@ -1,0 +1,38 @@
+// App.jsx
+import React, { useContext } from 'react';
+import { NotificationProvider, NotificationContext } from './NotificationContext';
+
+const NotificationList = () => {
+  const { notifications } = useContext(NotificationContext);
+  return (
+    <div>
+      {notifications.map(n => (
+        <div key={n.id} style={{ fontWeight: n.read ? 'normal' : 'bold', marginBottom: '8px' }}>
+          {n.message}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const Controls = () => {
+  const { markAllAsRead, stopNotifications } = useContext(NotificationContext);
+  return (
+    <div style={{ marginTop: '20px' }}>
+      <button onClick={markAllAsRead}>Mark All as Read</button>
+      <button onClick={stopNotifications} style={{ marginLeft: '10px' }}>Stop Notifications</button>
+    </div>
+  );
+};
+
+const App = () => (
+  <NotificationProvider>
+    <div style={{ padding: '20px', maxWidth: '400px', margin: 'auto' }}>
+      <h2>Notification Panel</h2>
+      <NotificationList />
+      <Controls />
+    </div>
+  </NotificationProvider>
+);
+
+export default App;
