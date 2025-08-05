@@ -1,0 +1,110 @@
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useParams } from 'react-router-dom';
+
+const API_KEY = 'YOUR_OMDB_API_KEY';
+
+function Navbar() {
+  return (
+    <nav style={{ padding: '1rem', background: '#eee' }}>
+      <Link to="/">Home</Link>
+    </nav>
+  );
+}
+
+function Home() {
+  const [query, setQuery] = useState('');
+  const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  function handleSearch(e) {
+    e.preventDefault();
+    if (!query) return;
+    setLoading(true);
+    setError('');
+    fetch(`https://www.omdbapi.com/?apikey=${API_KEY}&s=${query}`)
+      .then(res => res.json())
+      .then(data => {
+        setLoading(false);
+        if (data.Response === 'True') {
+          setMovies(data.Search);
+        } else {
+          setMovies([]);
+          setError(data.Error);
+        }
+      });
+  }
+
+  return (
+    <div style={{ padding: '1rem' }}>
+      <h2>Movie Search</h2>
+      <form onSubmit={handleSearch} style={{ marginBottom: '1rem' }}>
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search movie title"
+          style={{ padding: '0.5rem', width: '60%', marginRight: '0.5rem' }}
+        />
+        <button type="submit" style={{ padding: '0.5rem' }}>Search</button>
+      </form>
+      {loading && <p>Loading...</p>}
+      {error && <p>{error}</p>}
+      <ul style={{ listStyle: 'none', padding: 0 }}>
+        {movies.map(movie => (
+          <li key={movie.imdbID} style={{ marginBottom: '1rem' }}>
+            <Link to={`/movie/${movie.imdbID}`}>
+              <h3>{movie.Title} ({movie.Year})</h3>
+            </Link>
+            {movie.Poster !== 'N/A' && <img src={movie.Poster} alt={movie.Title} width="150" />}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function MovieDetails() {
+  const { id } = useParams();
+  const [movie, setMovie] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetch(`https://www.omdbapi.com/?apikey=${API_KEY}&i=${id}&plot=full`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.Response === 'True') {
+          setMovie(data);
+          setError('');
+        } else {
+          setError(data.Error);
+        }
+        setLoading(false);
+      });
+  }, [id]);
+
+  if (loading) return <p style={{ padding: '1rem' }}>Loading...</p>;
+  if (error) return <p style={{ padding: '1rem' }}>{error}</p>;
+  if (!movie) return null;
+
+  return (
+    <div style={{ padding: '1rem' }}>
+      <h2>{movie.Title} ({movie.Year})</h2>
+      {movie.Poster !== 'N/A' && <img src={movie.Poster} alt={movie.Title} width="200" />}
+      <p><strong>Genre:</strong> {movie.Genre}</p>
+      <p><strong>Plot:</strong> {movie.Plot}</p>
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <Router>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/movie/:id" element={<MovieDetails />} />
+      </Routes>
+    </Router>
+  );
+}
