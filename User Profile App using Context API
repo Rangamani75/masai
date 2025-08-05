@@ -1,0 +1,84 @@
+import React, { useState, useEffect, createContext, useContext } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+
+const UserContext = createContext();
+
+function Navbar() {
+  return (
+    <nav style={{ padding: '1rem', background: '#eee' }}>
+      <Link to="/" style={{ marginRight: '1rem' }}>Home</Link>
+      <Link to="/profile" style={{ marginRight: '1rem' }}>Profile</Link>
+      <Link to="/settings">Settings</Link>
+    </nav>
+  );
+}
+
+function Home() {
+  return (
+    <div style={{ padding: '1rem' }}>
+      <h2>Welcome to the App</h2>
+      <p>This is the homepage.</p>
+    </div>
+  );
+}
+
+function Profile() {
+  const { user } = useContext(UserContext);
+  return (
+    <div style={{ padding: '1rem' }}>
+      <h2>User Profile</h2>
+      <p><strong>Name:</strong> {user.name}</p>
+      <p><strong>Email:</strong> {user.email}</p>
+    </div>
+  );
+}
+
+function Settings() {
+  const { user, setUser } = useContext(UserContext);
+  const [name, setName] = useState(user.name);
+  const [email, setEmail] = useState(user.email);
+
+  useEffect(() => {
+    setName(user.name);
+    setEmail(user.email);
+  }, [user]);
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    setUser({ ...user, name, email });
+  }
+
+  return (
+    <div style={{ padding: '1rem' }}>
+      <h2>Settings</h2>
+      <form onSubmit={handleSubmit}>
+        <div style={{ marginBottom: '1rem' }}>
+          <label>Name:</label><br />
+          <input value={name} onChange={e => setName(e.target.value)} style={{ width: '100%', padding: '0.5rem' }} />
+        </div>
+        <div style={{ marginBottom: '1rem' }}>
+          <label>Email:</label><br />
+          <input value={email} onChange={e => setEmail(e.target.value)} style={{ width: '100%', padding: '0.5rem' }} />
+        </div>
+        <button type="submit" style={{ padding: '0.5rem 1rem' }}>Update</button>
+      </form>
+    </div>
+  );
+}
+
+export default function App() {
+  const [user, setUser] = useState({ name: 'John Doe', email: 'john@example.com' });
+
+  return (
+    <UserContext.Provider value={{ user, setUser }}>
+      <Router>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/settings" element={<Settings />} />
+        </Routes>
+      </Router>
+    </UserContext.Provider>
+  );
+}
