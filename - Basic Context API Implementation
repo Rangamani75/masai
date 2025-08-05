@@ -1,0 +1,48 @@
+import React, { createContext, useContext, useState } from 'react';
+
+const ThemeContext = createContext();
+
+function ThemeProvider({ children }) {
+  const [theme, setTheme] = useState('light');
+  const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
+  return (
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+
+function ThemedBox() {
+  const { theme } = useContext(ThemeContext);
+  const style = {
+    backgroundColor: theme === 'light' ? '#fff' : '#333',
+    color: theme === 'light' ? '#000' : '#fff',
+    padding: '2rem',
+    margin: '1rem',
+    borderRadius: '8px',
+    textAlign: 'center'
+  };
+  return <div style={style}>This box is in {theme} theme</div>;
+}
+
+function NestedComponent() {
+  return (
+    <div>
+      <ThemedBox />
+    </div>
+  );
+}
+
+export default function App() {
+  const { theme, toggleTheme } = useContext(ThemeContext);
+  return (
+    <ThemeProvider>
+      <div style={{ padding: '2rem' }}>
+        <button onClick={toggleTheme} style={{ marginBottom: '1rem' }}>
+          Toggle Theme
+        </button>
+        <NestedComponent />
+      </div>
+    </ThemeProvider>
+  );
+}
