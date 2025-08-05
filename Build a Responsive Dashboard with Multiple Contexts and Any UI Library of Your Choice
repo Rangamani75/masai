@@ -1,0 +1,123 @@
+import React, { createContext, useContext, useState } from 'react'
+import {
+  ChakraProvider,
+  Box,
+  Flex,
+  Button,
+  Text,
+  Grid,
+  useMediaQuery
+} from '@chakra-ui/react'
+
+const AuthContext = createContext()
+const ThemeContext = createContext()
+
+const AuthProvider = ({ children }) => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const toggleAuth = () => setIsLoggedIn(!isLoggedIn)
+  return (
+    <AuthContext.Provider value={{ isLoggedIn, toggleAuth }}>
+      {children}
+    </AuthContext.Provider>
+  )
+}
+
+const ThemeProviderCustom = ({ children }) => {
+  const [theme, setTheme] = useState('light')
+  const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light')
+  return (
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  )
+}
+
+const Navbar = () => {
+  const { isLoggedIn, toggleAuth } = useContext(AuthContext)
+  const { theme, toggleTheme } = useContext(ThemeContext)
+  const bg = theme === 'light' ? 'gray.100' : 'gray.800'
+  const color = theme === 'light' ? 'black' : 'white'
+  return (
+    <Flex p="4" justify="space-between" bg={bg} color={color}>
+      <Text>{isLoggedIn ? 'Logged In' : 'Logged Out'}</Text>
+      <Flex gap="2">
+        <Button size="sm" onClick={toggleAuth}>
+          {isLoggedIn ? 'Logout' : 'Login'}
+        </Button>
+        <Button size="sm" onClick={toggleTheme}>
+          Toggle Theme
+        </Button>
+      </Flex>
+    </Flex>
+  )
+}
+
+const Sidebar = () => {
+  const { isLoggedIn } = useContext(AuthContext)
+  const { theme } = useContext(ThemeContext)
+  const [isLargerThan768] = useMediaQuery('(min-width: 768px)')
+  const bg = theme === 'light' ? 'gray.200' : 'gray.700'
+  const color = theme === 'light' ? 'black' : 'white'
+  if (!isLargerThan768) return null
+  return (
+    <Box w="200px" p="4" bg={bg} color={color}>
+      {isLoggedIn ? <Text>Welcome User</Text> : <Text>Sidebar</Text>}
+    </Box>
+  )
+}
+
+const MainContent = () => {
+  const { theme } = useContext(ThemeContext)
+  const bg = theme === 'light' ? 'gray.50' : 'gray.900'
+  const cardBg = theme === 'light' ? 'white' : 'gray.700'
+  const color = theme === 'light' ? 'black' : 'white'
+  return (
+    <Box flex="1" bg={bg} p="4" color={color}>
+      <Grid templateColumns={['1fr', 'repeat(2, 1fr)', 'repeat(3, 1fr)']} gap="4">
+        {[...Array(6)].map((_, i) => (
+          <Box key={i} p="6" bg={cardBg} shadow="md" borderRadius="md">
+            Product {i + 1}
+          </Box>
+        ))}
+      </Grid>
+    </Box>
+  )
+}
+
+const Footer = () => {
+  const { theme } = useContext(ThemeContext)
+  const bg = theme === 'light' ? 'gray.100' : 'gray.800'
+  const color = theme === 'light' ? 'black' : 'white'
+  return (
+    <Box bg={bg} color={color} p="4" textAlign="center" position="sticky" bottom="0">
+      © 2025 Dashboard Footer
+    </Box>
+  )
+}
+
+const Layout = () => {
+  return (
+    <Flex direction="column" minH="100vh">
+      <Navbar />
+      <Flex flex="1">
+        <Sidebar />
+        <MainContent />
+      </Flex>
+      <Footer />
+    </Flex>
+  )
+}
+
+const App = () => {
+  return (
+    <ChakraProvider>
+      <ThemeProviderCustom>
+        <AuthProvider>
+          <Layout />
+        </AuthProvider>
+      </ThemeProviderCustom>
+    </ChakraProvider>
+  )
+}
+
+export default App
