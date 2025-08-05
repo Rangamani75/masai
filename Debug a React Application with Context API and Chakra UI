@@ -1,0 +1,54 @@
+import React, { createContext, useContext, useState } from 'react'
+import { ChakraProvider, Box, Flex, Grid, Button } from '@chakra-ui/react'
+
+const AuthContext = createContext()
+const AuthContextProvider = ({ children }) => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const toggleAuth = () => setIsLoggedIn(!isLoggedIn)
+  return <AuthContext.Provider value={{ isLoggedIn, toggleAuth }}>{children}</AuthContext.Provider>
+}
+
+const ThemeContext = createContext()
+const ThemeContextProvider = ({ children }) => {
+  const [theme, setTheme] = useState('light')
+  const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light')
+  return <ThemeContext.Provider value={{ theme, toggleTheme }}>{children}</ThemeContext.Provider>
+}
+
+function App() {
+  const { isLoggedIn, toggleAuth } = useContext(AuthContext)
+  const { theme, toggleTheme } = useContext(ThemeContext)
+
+  const bgColor = theme === 'light' ? 'gray.100' : 'gray.700'
+  const cardBg = theme === 'light' ? 'gray.200' : 'gray.600'
+  const footerBg = theme === 'light' ? 'gray.300' : 'gray.800'
+  const textColor = theme === 'light' ? 'black' : 'white'
+  const mainBg = theme === 'light' ? 'white' : 'gray.900'
+
+  return (
+    <Box minH="100vh" bg={mainBg} color={textColor}>
+      <Flex as="nav" p="4" bg={bgColor} justifyContent="space-between">
+        <Button onClick={toggleAuth}>{isLoggedIn ? 'Log Out' : 'Log In'}</Button>
+        <Button onClick={toggleTheme}>Toggle to {theme === 'light' ? 'Dark' : 'Light'} Theme</Button>
+      </Flex>
+      <Grid templateColumns={['1fr', '1fr 1fr', 'repeat(3, 1fr)']} gap="4" p="4">
+        {['Card 1', 'Card 2', 'Card 3'].map((card) => (
+          <Box key={card} p="4" shadow="md" bg={cardBg} borderRadius="md">{card}</Box>
+        ))}
+      </Grid>
+      <Box as="footer" p="4" bg={footerBg} textAlign="center">Footer Content</Box>
+    </Box>
+  )
+}
+
+const RootApp = () => (
+  <ChakraProvider>
+    <ThemeContextProvider>
+      <AuthContextProvider>
+        <App />
+      </AuthContextProvider>
+    </ThemeContextProvider>
+  </ChakraProvider>
+)
+
+export default RootApp
