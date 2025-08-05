@@ -1,0 +1,52 @@
+import React, { createContext, useContext, useState } from 'react';
+
+const AuthContext = createContext();
+
+function AuthProvider({ children }) {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const toggleAuth = () => setIsLoggedIn(prev => !prev);
+  return (
+    <AuthContext.Provider value={{ isLoggedIn, toggleAuth }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+function Navbar() {
+  const { isLoggedIn, toggleAuth } = useContext(AuthContext);
+  return (
+    <nav style={{ background: '#eee', padding: '1rem' }}>
+      <button onClick={toggleAuth}>
+        {isLoggedIn ? 'Logout' : 'Login'}
+      </button>
+    </nav>
+  );
+}
+
+function Main() {
+  const { isLoggedIn } = useContext(AuthContext);
+  return (
+    <main style={{ padding: '2rem' }}>
+      <h2>{isLoggedIn ? 'You are logged in.' : 'You are not logged in.'}</h2>
+    </main>
+  );
+}
+
+function Footer() {
+  const { isLoggedIn } = useContext(AuthContext);
+  return (
+    <footer style={{ background: '#eee', padding: '1rem' }}>
+      {isLoggedIn ? 'Welcome, User' : 'Please log in'}
+    </footer>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <Navbar />
+      <Main />
+      <Footer />
+    </AuthProvider>
+  );
+}
