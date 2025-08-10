@@ -1,0 +1,28 @@
+import React, { useReducer } from "react";
+
+const initialState = { isVisible: false };
+
+function reducer(state, action) {
+  switch (action.type) {
+    case "TOGGLE_VISIBILITY":
+      return { isVisible: !state.isVisible };
+    default:
+      return state;
+  }
+}
+
+export default function App() {
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  return (
+    <div style={{ padding: "20px", textAlign: "center" }}>
+      <button
+        onClick={() => dispatch({ type: "TOGGLE_VISIBILITY" })}
+        style={{ padding: "8px 16px", marginBottom: "20px" }}
+      >
+        Toggle Message
+      </button>
+      {state.isVisible && <h1>Hello, World!</h1>}
+    </div>
+  );
+}
