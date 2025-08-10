@@ -1,0 +1,65 @@
+import React, { useReducer, useState } from "react";
+
+const initialState = {
+  email: "",
+  password: ""
+};
+
+function reducer(state, action) {
+  switch (action.type) {
+    case "email":
+      return { ...state, email: action.payload };
+    case "password":
+      return { ...state, password: action.payload };
+    case "reset":
+      return initialState;
+    default:
+      throw new Error("invalid action type");
+  }
+}
+
+export default function App() {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (state.email || state.password) {
+      setSubmitted(true);
+    } else {
+      setSubmitted(false);
+    }
+  };
+
+  const handleReset = () => {
+    dispatch({ type: "reset" });
+    setSubmitted(false);
+  };
+
+  return (
+    <div style={{ padding: "20px", fontFamily: "Arial" }}>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <input
+            type="email"
+            placeholder="Enter email"
+            value={state.email}
+            onChange={(e) =>
+              dispatch({ type: "email", payload: e.target.value })
+            }
+            style={{ padding: "8px", marginBottom: "10px", display: "block" }}
+          />
+        </div>
+        <div>
+          <input
+            type="password"
+            placeholder="Enter password"
+            value={state.password}
+            onChange={(e) =>
+              dispatch({ type: "password", payload: e.target.value })
+            }
+            style={{ padding: "8px", marginBottom: "10px", display: "block" }}
+          />
+        </div>
+        <button type="submit" style={{ padding: "8px 16px", marginRight: "10px" }}>
+          Submit
