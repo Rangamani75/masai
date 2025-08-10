@@ -1,0 +1,45 @@
+import React, { useReducer } from "react";
+
+const initialState = { theme: "light" };
+
+function reducer(state, action) {
+  switch (action.type) {
+    case "TOGGLE_THEME":
+      return { theme: state.theme === "light" ? "dark" : "light" };
+    default:
+      return state;
+  }
+}
+
+export default function App() {
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  const styles = {
+    backgroundColor: state.theme === "light" ? "#ffffff" : "#333333",
+    color: state.theme === "light" ? "#000000" : "#ffffff",
+    height: "100vh",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    transition: "all 0.3s ease"
+  };
+
+  return (
+    <div style={styles}>
+      <h1>{state.theme.toUpperCase()} MODE</h1>
+      <button
+        onClick={() => dispatch({ type: "TOGGLE_THEME" })}
+        style={{
+          padding: "10px 20px",
+          fontSize: "16px",
+          cursor: "pointer",
+          borderRadius: "5px",
+          border: "none"
+        }}
+      >
+        Toggle Theme
+      </button>
+    </div>
+  );
+}
