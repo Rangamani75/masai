@@ -1,0 +1,58 @@
+import React, { useState, useEffect, useRef } from "react";
+
+export default function App() {
+  const [characters, setCharacters] = useState([]);
+  const [totalPages, setTotalPages] = useState(0);
+  const currentPageRef = useRef(1);
+
+  useEffect(() => {
+    fetch(`https://rickandmortyapi.com/api/character?page=${currentPageRef.current}`)
+      .then(res => res.json())
+      .then(data => {
+        setCharacters(data.results);
+        setTotalPages(Math.ceil(data.info.count / 10));
+      });
+  }, []);
+
+  const changePage = (page) => {
+    currentPageRef.current = page;
+    fetch(`https://rickandmortyapi.com/api/character?page=${page}`)
+      .then(res => res.json())
+      .then(data => setCharacters(data.results));
+  };
+
+  return (
+    <div style={{ padding: "20px" }}>
+      <h1>Rick and Morty Characters</h1>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: "10px" }}>
+        {characters.map(c => (
+          <div key={c.id} style={{ border: "1px solid #ccc", borderRadius: "8px", padding: "10px", textAlign: "center" }}>
+            <img src={c.image} alt={c.name} style={{ width: "100%", borderRadius: "8px" }} />
+            <p>{c.name}</p>
+          </div>
+        ))}
+      </div>
+      <div style={{ marginTop: "20px", display: "flex", gap: "5px", flexWrap: "wrap" }}>
+        {[...Array(totalPages)].map((_, i) => {
+          const page = i + 1;
+          return (
+            <button
+              key={page}
+              onClick={() => changePage(page)}
+              style={{
+                padding: "8px 12px",
+                border: "1px solid #ccc",
+                background: currentPageRef.current === page ? "#4cafef" : "white",
+                color: currentPageRef.current === page ? "white" : "black",
+                borderRadius: "4px",
+                cursor: "pointer"
+              }}
+            >
+              {page}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
