@@ -1,0 +1,22 @@
+import React, { useRef, useState } from "react";
+
+export default function App() {
+  const inputRef = useRef(null);
+  const [focused, setFocused] = useState(false);
+
+  const handleFocus = () => {
+    inputRef.current.focus();
+    inputRef.current.style.backgroundColor = "#ffff99";
+    setFocused(true);
+  };
+
+  return (
+    <div style={{ padding: "20px" }}>
+      <input ref={inputRef} type="text" style={{ padding: "8px", fontSize: "16px" }} />
+      <button onClick={handleFocus} style={{ marginLeft: "10px", padding: "8px 12px" }}>
+        Focus Input
+      </button>
+      {focused && <p>Focused!</p>}
+    </div>
+  );
+}
