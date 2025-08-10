@@ -1,0 +1,30 @@
+import React, { useReducer } from "react";
+
+const initialState = { count: 0 };
+
+function reducer(state, action) {
+  switch (action.type) {
+    case "INCREMENT":
+      return { count: state.count + 1 };
+    case "DECREMENT":
+      return { count: state.count - 1 };
+    default:
+      return state;
+  }
+}
+
+export default function App() {
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  return (
+    <div style={{ padding: "20px", textAlign: "center" }}>
+      <h1>Count: {state.count}</h1>
+      <button onClick={() => dispatch({ type: "INCREMENT" })} style={{ marginRight: "10px", padding: "8px 16px" }}>
+        Increment
+      </button>
+      <button onClick={() => dispatch({ type: "DECREMENT" })} style={{ padding: "8px 16px" }}>
+        Decrement
+      </button>
+    </div>
+  );
+}
