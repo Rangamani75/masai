@@ -1,0 +1,231 @@
+import React, { useEffect, useState } from "react";
+import ReactDOM from "react-dom/client";
+import { ChakraProvider, Box, Heading, Input, Select, Grid, VStack, HStack, Text, Button, Spinner, Badge, Stack, IconButton, useToast } from "@chakra-ui/react";
+import { configureStore, createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { Provider, useDispatch, useSelector } from "react-redux";
+import axios from "axios";
+import { StarIcon } from "@chakra-ui/icons";
+
+const fetchMatches = createAsyncThunk("football/fetchMatches", async () => {
+  const res = await axios.get("https://jsonmock.hackerrank.com/api/football_matches?page=2");
+  return res.data.data || [];
+});
+
+const footballSlice = createSlice({
+  name: "football",
+  initialState: {
+    isLoading: false,
+    isError: false,
+    footballMatches: [],
+    favorites: [],
+    searchTerm: "",
+    filterTeam: "",
+    filterResult: "",
+    upcomingNotifications: []
+  },
+  reducers: {
+    setSearchTerm: (state, action) => { state.searchTerm = action.payload },
+    setFilterTeam: (state, action) => { state.filterTeam = action.payload },
+    setFilterResult: (state, action) => { state.filterResult = action.payload },
+    toggleFavorite: (state, action) => {
+      const match = action.payload;
+      const exists = state.favorites.find(m => m.match_id === match.match_id);
+      state.favorites = exists ? state.favorites.filter(m => m.match_id !== match.match_id) : [...state.favorites, match];
+    },
+    clearFilters: (state) => {
+      state.searchTerm = "";
+      state.filterTeam = "";
+      state.filterResult = "";
+    },
+    addNotification: (state, action) => {
+      state.upcomingNotifications.push(action.payload);
+    },
+    removeNotification: (state, action) => {
+      state.upcomingNotifications = state.upcomingNotifications.filter(n => n.id !== action.payload);
+    }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchMatches.pending, (state) => { state.isLoading = true; state.isError = false })
+      .addCase(fetchMatches.fulfilled, (state, action) => { state.isLoading = false; state.footballMatches = action.payload })
+      .addCase(fetchMatches.rejected, (state) => { state.isLoading = false; state.isError = true });
+  }
+});
+
+const { setSearchTerm, setFilterTeam, setFilterResult, toggleFavorite, clearFilters, addNotification, removeNotification } = footballSlice.actions;
+
+const store = configureStore({ reducer: { football: footballSlice.reducer } });
+
+function useFilteredMatches() {
+  const { footballMatches, searchTerm, filterTeam, filterResult } = useSelector(s => s.football);
+  return React.useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    return footballMatches.filter(m => {
+      const values = `${m.team1} ${m.team2} ${m.venue || ""} ${m.date || ""} ${m.match_id}`.toLowerCase();
+      const searchMatch = term === "" || values.includes(term);
+      const teamMatch = !filterTeam || m.team1 === filterTeam || m.team2 === filterTeam;
+      const resultMatch = !filterResult || (
+        filterResult === "draw" ? String(m.team1goals) === String(m.team2goals) :
+        filterResult === "team1win" ? Number(m.team1goals) > Number(m.team2goals) :
+        filterResult === "team2win" ? Number(m.team2goals) > Number(m.team1goals) :
+        true
+      );
+      return searchMatch && teamMatch && resultMatch;
+    });
+  }, [footballMatches, searchTerm, filterTeam, filterResult]);
+}
+
+function SearchFilterBar() {
+  const dispatch = useDispatch();
+  const { footballMatches, searchTerm, filterTeam, filterResult } = useSelector(s => s.football);
+  const teams = React.useMemo(() => [...new Set(footballMatches.flatMap(m => [m.team1, m.team2]))].sort(), [footballMatches]);
+  return (
+    <HStack w="100%" spacing={3} wrap="wrap">
+      <Input placeholder="Search by team, venue, date..." value={searchTerm} onChange={e => dispatch(setSearchTerm(e.target.value))} />
+      <Select placeholder="Filter by team" value={filterTeam} onChange={e => dispatch(setFilterTeam(e.target.value))}>
+        {teams.map(t => <option key={t} value={t}>{t}</option>)}
+      </Select>
+      <Select placeholder="Filter by result" value={filterResult} onChange={e => dispatch(setFilterResult(e.target.value))}>
+        <option value="team1win">Team1 Win</option>
+        <option value="team2win">Team2 Win</option>
+        <option value="draw">Draw</option>
+      </Select>
+      <Button onClick={() => dispatch(clearFilters())}>Clear</Button>
+    </HStack>
+  );
+}
+
+function MatchCard({ match }) {
+  const dispatch = useDispatch();
+  const favorites = useSelector(s => s.football.favorites);
+  const isFav = favorites.some(f => f.match_id === match.match_id);
+  return (
+    <Box p={4} borderWidth={1} borderRadius="md">
+      <HStack justify="space-between" align="start">
+        <VStack align="start" spacing={1}>
+          <Text fontWeight="bold" fontSize="lg">{match.team1} vs {match.team2}</Text>
+          <Text fontSize="sm">Date: {match.date || "N/A"}</Text>
+          <Text fontSize="sm">Venue: {match.venue || "N/A"}</Text>
+          <Text>Score: {match.team1goals} - {match.team2goals}</Text>
+          <Badge colorScheme={Number(match.team1goals) === Number(match.team2goals) ? "yellow" : Number(match.team1goals) > Number(match.team2goals) ? "green" : "red"}>
+            {Number(match.team1goals) === Number(match.team2goals) ? "Draw" : Number(match.team1goals) > Number(match.team2goals) ? `${match.team1} Win` : `${match.team2} Win`}
+          </Badge>
+        </VStack>
+        <VStack>
+          <IconButton aria-label="fav" icon={<StarIcon />} colorScheme={isFav ? "yellow" : "gray"} onClick={() => dispatch(toggleFavorite(match))} />
+          <Button size="sm" onClick={() => dispatch(addNotification({ id: `${match.match_id}`, match }))}>Notify Me</Button>
+        </VStack>
+      </HStack>
+    </Box>
+  );
+}
+
+function MatchesList() {
+  const filtered = useFilteredMatches();
+  const { isLoading } = useSelector(s => s.football);
+  if (isLoading) return <Spinner />;
+  return (
+    <Grid templateColumns="repeat(auto-fill, minmax(280px, 1fr))" gap={4} w="100%">
+      {filtered.map(m => <MatchCard key={m.match_id} match={m} />)}
+    </Grid>
+  );
+}
+
+function FavoritesPanel() {
+  const favorites = useSelector(s => s.football.favorites);
+  if (!favorites.length) return null;
+  return (
+    <Box w="100%" p={3} borderWidth={1} borderRadius="md">
+      <Heading size="sm" mb={2}>Favorites</Heading>
+      <VStack align="start">
+        {favorites.map(f => <Text key={f.match_id}>{f.team1} vs {f.team2} ({f.date})</Text>)}
+      </VStack>
+    </Box>
+  );
+}
+
+function NotificationsPanel() {
+  const notifications = useSelector(s => s.football.upcomingNotifications);
+  const dispatch = useDispatch();
+  const toast = useToast();
+  useEffect(() => {
+    notifications.forEach(n => {
+      toast({ title: "Notification set", description: `You'll be notified for ${n.match.team1} vs ${n.match.team2}`, status: "info", duration: 3000, isClosable: true });
+    });
+  }, [notifications, toast]);
+  if (!notifications.length) return null;
+  return (
+    <Box w="100%" p={3} borderWidth={1} borderRadius="md">
+      <Heading size="sm" mb={2}>Notifications</Heading>
+      <VStack align="start">
+        {notifications.map(n => (
+          <HStack key={n.id} justify="space-between" w="100%">
+            <Text>{n.match.team1} vs {n.match.team2} ({n.match.date})</Text>
+            <Button size="sm" onClick={() => dispatch(removeNotification(n.id))}>Remove</Button>
+          </HStack>
+        ))}
+      </VStack>
+    </Box>
+  );
+}
+
+function StatsPanel() {
+  const matches = useSelector(s => s.football.footballMatches);
+  const total = matches.length;
+  const totalGoals = matches.reduce((acc, m) => acc + Number(m.team1goals) + Number(m.team2goals), 0);
+  const avgGoals = total ? (totalGoals / total).toFixed(2) : 0;
+  return (
+    <Box w="100%" p={3} borderWidth={1} borderRadius="md">
+      <Heading size="sm" mb={2}>Statistics</Heading>
+      <VStack align="start">
+        <Text>Total Matches: {total}</Text>
+        <Text>Total Goals: {totalGoals}</Text>
+        <Text>Avg Goals per Match: {avgGoals}</Text>
+      </VStack>
+    </Box>
+  );
+}
+
+function AppBody() {
+  const dispatch = useDispatch();
+  useEffect(() => { dispatch(fetchMatches()) }, [dispatch]);
+  return (
+    <VStack spacing={5} w="100%">
+      <SearchFilterBar />
+      <HStack align="start" spacing={4} w="100%" flexWrap="wrap">
+        <VStack spacing={4} flex="1" minW="300px">
+          <MatchesList />
+        </VStack>
+        <VStack spacing={4} w="320px" flexShrink={0}>
+          <FavoritesPanel />
+          <NotificationsPanel />
+          <StatsPanel />
+          <Box w="100%" p={3} borderWidth={1} borderRadius="md">
+            <Heading size="sm" mb={2}>Raw State</Heading>
+            <pre style={{ whiteSpace: "pre-wrap", maxHeight: 200, overflow: "auto" }}>{JSON.stringify(store.getState().football, null, 2)}</pre>
+          </Box>
+        </VStack>
+      </HStack>
+    </VStack>
+  );
+}
+
+function App() {
+  return (
+    <ChakraProvider>
+      <Box p={5} maxW="1200px" mx="auto">
+        <Heading mb={4}>Football Match Tracker</Heading>
+        <Provider store={store}>
+          <AppBody />
+        </Provider>
+      </Box>
+    </ChakraProvider>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(
+  <Provider store={store}>
+    <App />
+  </Provider>
+);
