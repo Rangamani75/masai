@@ -1,0 +1,146 @@
+import React, { useState } from "react";
+import ReactDOM from "react-dom/client";
+import { ChakraProvider, Box, Input, Button, VStack, HStack, Text, Select, Badge, Stack } from "@chakra-ui/react";
+import { createStore, combineReducers } from "redux";
+import { Provider, useDispatch, useSelector } from "react-redux";
+
+const ADD_BOOK = "ADD_BOOK";
+const TOGGLE_READ = "TOGGLE_READ";
+const DELETE_BOOK = "DELETE_BOOK";
+const EDIT_BOOK = "EDIT_BOOK";
+const SET_FILTER = "SET_FILTER";
+
+const addBook = (book) => ({ type: ADD_BOOK, payload: book });
+const toggleRead = (id) => ({ type: TOGGLE_READ, payload: id });
+const deleteBook = (id) => ({ type: DELETE_BOOK, payload: id });
+const editBook = (book) => ({ type: EDIT_BOOK, payload: book });
+const setFilter = (filter) => ({ type: SET_FILTER, payload: filter });
+
+const booksReducer = (state = [], action) => {
+  switch (action.type) {
+    case ADD_BOOK:
+      return [...state, { ...action.payload, id: Date.now(), read: false }];
+    case TOGGLE_READ:
+      return state.map((b) => (b.id === action.payload ? { ...b, read: !b.read } : b));
+    case DELETE_BOOK:
+      return state.filter((b) => b.id !== action.payload);
+    case EDIT_BOOK:
+      return state.map((b) => (b.id === action.payload.id ? { ...action.payload } : b));
+    default:
+      return state;
+  }
+};
+
+const filtersReducer = (state = { author: "", genre: "", status: "all" }, action) => {
+  switch (action.type) {
+    case SET_FILTER:
+      return { ...state, ...action.payload };
+    default:
+      return state;
+  }
+};
+
+const rootReducer = combineReducers({
+  books: booksReducer,
+  filters: filtersReducer
+});
+
+const store = createStore(rootReducer);
+
+function BookForm() {
+  const dispatch = useDispatch();
+  const [title, setTitle] = useState("");
+  const [author, setAuthor] = useState("");
+  const [genre, setGenre] = useState("");
+  const handleAdd = () => {
+    if (title && author && genre) {
+      dispatch(addBook({ title, author, genre }));
+      setTitle("");
+      setAuthor("");
+      setGenre("");
+    }
+  };
+  return (
+    <VStack spacing={2}>
+      <Input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
+      <Input placeholder="Author" value={author} onChange={(e) => setAuthor(e.target.value)} />
+      <Input placeholder="Genre" value={genre} onChange={(e) => setGenre(e.target.value)} />
+      <Button colorScheme="teal" onClick={handleAdd} w="full">Add Book</Button>
+    </VStack>
+  );
+}
+
+function Filters() {
+  const dispatch = useDispatch();
+  const filters = useSelector((state) => state.filters);
+  return (
+    <HStack spacing={3} wrap="wrap">
+      <Input placeholder="Filter by Author" value={filters.author} onChange={(e) => dispatch(setFilter({ author: e.target.value }))} />
+      <Input placeholder="Filter by Genre" value={filters.genre} onChange={(e) => dispatch(setFilter({ genre: e.target.value }))} />
+      <Select value={filters.status} onChange={(e) => dispatch(setFilter({ status: e.target.value }))}>
+        <option value="all">All</option>
+        <option value="read">Read</option>
+        <option value="unread">Unread</option>
+      </Select>
+    </HStack>
+  );
+}
+
+function BookList() {
+  const books = useSelector((state) => state.books);
+  const filters = useSelector((state) => state.filters);
+  const dispatch = useDispatch();
+  const filteredBooks = books.filter((b) => {
+    return (
+      (filters.author === "" || b.author.toLowerCase().includes(filters.author.toLowerCase())) &&
+      (filters.genre === "" || b.genre.toLowerCase().includes(filters.genre.toLowerCase())) &&
+      (filters.status === "all" || (filters.status === "read" && b.read) || (filters.status === "unread" && !b.read))
+    );
+  });
+  return (
+    <VStack spacing={3} align="stretch">
+      {filteredBooks.map((book) => (
+        <Box key={book.id} p={3} borderWidth="1px" borderRadius="md" display="flex" justifyContent="space-between" flexWrap="wrap" gap={2}>
+          <Stack spacing={1}>
+            <Text fontWeight="bold">{book.title}</Text>
+            <Text>Author: {book.author}</Text>
+            <Text>Genre: {book.genre}</Text>
+            <Badge colorScheme={book.read ? "green" : "red"}>{book.read ? "Read" : "Unread"}</Badge>
+          </Stack>
+          <HStack>
+            <Button size="sm" colorScheme="blue" onClick={() => dispatch(toggleRead(book.id))}>Toggle Read</Button>
+            <Button size="sm" colorScheme="orange" onClick={() => {
+              const newTitle = prompt("New Title", book.title);
+              const newAuthor = prompt("New Author", book.author);
+              const newGenre = prompt("New Genre", book.genre);
+              if (newTitle && newAuthor && newGenre) {
+                dispatch(editBook({ ...book, title: newTitle, author: newAuthor, genre: newGenre }));
+              }
+            }}>Edit</Button>
+            <Button size="sm" colorScheme="red" onClick={() => dispatch(deleteBook(book.id))}>Delete</Button>
+          </HStack>
+        </Box>
+      ))}
+    </VStack>
+  );
+}
+
+function App() {
+  return (
+    <Box maxW="600px" mx="auto" p={5}>
+      <BookForm />
+      <Box mt={5}><Filters /></Box>
+      <Box mt={5}><BookList /></Box>
+      <Box mt={5}><pre>{JSON.stringify(store.getState(), null, 2)}</pre></Box>
+    </Box>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(
+  <ChakraProvider>
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </ChakraProvider>
+);
