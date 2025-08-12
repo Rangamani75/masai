@@ -1,0 +1,35 @@
+import React from "react";
+import { ChakraProvider, Box, Image, Heading, Text, Flex } from "@chakra-ui/react";
+
+export default function App() {
+  return (
+    <ChakraProvider>
+      <Flex minH="100vh" align="center" justify="center" bg="gray.100" p={4}>
+        <Box
+          maxW="sm"
+          borderWidth="1px"
+          borderRadius="lg"
+          overflow="hidden"
+          boxShadow="lg"
+          bg="white"
+          p={4}
+          _hover={{ transform: "scale(1.05)", transition: "0.3s" }}
+        >
+          <Heading size="md" mb={4} textAlign="center" color="teal.600">
+            Beautiful Chakra UI Card
+          </Heading>
+          <Image
+            src="https://via.placeholder.com/300"
+            alt="Card image"
+            borderRadius="md"
+            mx="auto"
+            mb={4}
+          />
+          <Text color="gray.700" fontSize="md" textAlign="center">
+            This is a beautiful, responsive card built using Chakra UI's components and styling utilities.
+          </Text>
+        </Box>
+      </Flex>
+    </ChakraProvider>
+  );
+}
