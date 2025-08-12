@@ -1,0 +1,92 @@
+import React, { useEffect } from "react";
+import { createRoot } from "react-dom/client";
+import { ChakraProvider, Box, Grid, Select, Image, Text, Flex } from "@chakra-ui/react";
+import { createStore, applyMiddleware } from "redux";
+import { Provider, useDispatch, useSelector } from "react-redux";
+import thunk from "redux-thunk";
+
+const FETCH_COFFEE_REQUEST = "FETCH_COFFEE_REQUEST";
+const FETCH_COFFEE_SUCCESS = "FETCH_COFFEE_SUCCESS";
+const FETCH_COFFEE_FAILURE = "FETCH_COFFEE_FAILURE";
+
+const fetchCoffeeRequest = () => ({ type: FETCH_COFFEE_REQUEST });
+const fetchCoffeeSuccess = (data) => ({ type: FETCH_COFFEE_SUCCESS, payload: data });
+const fetchCoffeeFailure = (error) => ({ type: FETCH_COFFEE_FAILURE, payload: error });
+
+const fetchCoffee = (sort = "") => {
+  return async (dispatch) => {
+    dispatch(fetchCoffeeRequest());
+    try {
+      const res = await fetch(`https://dbioz2ek0e.execute-api.ap-south-1.amazonaws.com/mockapi/get-coffee${sort ? `?sort=${sort}&order=asc` : ""}`);
+      const data = await res.json();
+      dispatch(fetchCoffeeSuccess(data.data));
+    } catch (err) {
+      dispatch(fetchCoffeeFailure(err.message));
+    }
+  };
+};
+
+const initialState = { loading: false, coffee: [], error: "" };
+
+const coffeeReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case FETCH_COFFEE_REQUEST:
+      return { ...state, loading: true };
+    case FETCH_COFFEE_SUCCESS:
+      return { loading: false, coffee: action.payload, error: "" };
+    case FETCH_COFFEE_FAILURE:
+      return { loading: false, coffee: [], error: action.payload };
+    default:
+      return state;
+  }
+};
+
+const store = createStore(coffeeReducer, applyMiddleware(thunk));
+
+const CoffeeList = () => {
+  const dispatch = useDispatch();
+  const { loading, coffee, error } = useSelector((state) => state);
+
+  useEffect(() => {
+    dispatch(fetchCoffee());
+  }, [dispatch]);
+
+  const handleSort = (e) => {
+    dispatch(fetchCoffee(e.target.value));
+  };
+
+  return (
+    <Flex>
+      <Box w="200px" p="4" borderRight="1px solid #ccc">
+        <Select placeholder="Sort By" onChange={handleSort}>
+          <option value="title">Name</option>
+          <option value="price">Price</option>
+        </Select>
+      </Box>
+      <Box flex="1" p="4">
+        {loading && <Text>Loading...</Text>}
+        {error && <Text color="red.500">{error}</Text>}
+        <Grid templateColumns="repeat(auto-fit, minmax(200px, 1fr))" gap={4}>
+          {coffee.map((item) => (
+            <Box key={item.id} borderWidth="1px" borderRadius="lg" overflow="hidden" p="4">
+              <Image src={item.image} alt={item.title} boxSize="150px" objectFit="cover" mx="auto" />
+              <Text mt="2" fontWeight="bold">{item.title}</Text>
+              <Text>Price: ${item.price}</Text>
+            </Box>
+          ))}
+        </Grid>
+      </Box>
+    </Flex>
+  );
+};
+
+const App = () => (
+  <Provider store={store}>
+    <ChakraProvider>
+      <CoffeeList />
+    </ChakraProvider>
+  </Provider>
+);
+
+const root = createRoot(document.getElementById("root"));
+root.render(<App />);
