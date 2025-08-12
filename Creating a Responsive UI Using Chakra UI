@@ -1,0 +1,45 @@
+import React from "react";
+import { ChakraProvider, Box, Flex, Heading, Button, SimpleGrid, Image, Text, Stack } from "@chakra-ui/react";
+import { createRoot } from "react-dom/client";
+
+function App() {
+  const cards = [
+    { id: 1, title: "Card One", desc: "This is the first card", img: "https://via.placeholder.com/300" },
+    { id: 2, title: "Card Two", desc: "This is the second card", img: "https://via.placeholder.com/300" },
+    { id: 3, title: "Card Three", desc: "This is the third card", img: "https://via.placeholder.com/300" }
+  ];
+
+  return (
+    <ChakraProvider>
+      <Box>
+        <Flex as="nav" bg="blue.500" color="white" p={4} justify="space-between" align="center" flexDirection={{ base: "column", md: "row" }}>
+          <Heading size="md" mb={{ base: 2, md: 0 }}>Responsive UI</Heading>
+          <Flex gap={4}>
+            <Button colorScheme="teal" variant="solid">Home</Button>
+            <Button colorScheme="teal" variant="outline">About</Button>
+            <Button colorScheme="teal" variant="ghost">Contact</Button>
+          </Flex>
+        </Flex>
+        <Box p={5}>
+          <SimpleGrid columns={{ base: 1, md: 3 }} spacing={5}>
+            {cards.map(card => (
+              <Box key={card.id} borderWidth="1px" borderRadius="lg" overflow="hidden">
+                <Image src={card.img} alt={card.title} />
+                <Box p={5}>
+                  <Stack spacing={3}>
+                    <Heading size="md">{card.title}</Heading>
+                    <Text>{card.desc}</Text>
+                    <Button colorScheme="blue">Learn More</Button>
+                  </Stack>
+                </Box>
+              </Box>
+            ))}
+          </SimpleGrid>
+        </Box>
+      </Box>
+    </ChakraProvider>
+  );
+}
+
+const root = createRoot(document.getElementById("root"));
+root.render(<App />);
