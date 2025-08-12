@@ -1,0 +1,351 @@
+import React, { useEffect, useState, useMemo, useCallback } from "react";
+import ReactDOM from "react-dom/client";
+import { ChakraProvider, Box, Heading, Input, Button, VStack, HStack, Text, Grid, Image, Badge, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, SimpleGrid, Select, IconButton, Spacer, Stack, Tooltip } from "@chakra-ui/react";
+import { StarIcon } from "@chakra-ui/icons";
+import axios from "axios";
+import { configureStore, createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { Provider, useDispatch, useSelector } from "react-redux";
+
+const API_KEY = "YOUR_TMDB_API_KEY";
+const TMDB_SEARCH_URL = (q, page = 1) => `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(q)}&page=${page}`;
+const TMDB_DETAILS_URL = (id) => `https://api.themoviedb.org/3/movie/${id}?api_key=${API_KEY}&append_to_response=credits,videos`;
+
+const fetchMovies = createAsyncThunk("movies/fetchMovies", async ({ query, page = 1 }, { getState }) => {
+  if (!query) return { results: [], page: 1, total_pages: 0 };
+  const res = await axios.get(TMDB_SEARCH_URL(query, page));
+  return res.data;
+});
+
+const fetchMovieDetails = createAsyncThunk("movies/fetchMovieDetails", async (id) => {
+  const res = await axios.get(TMDB_DETAILS_URL(id));
+  return res.data;
+});
+
+const authSlice = createSlice({
+  name: "auth",
+  initialState: { user: JSON.parse(localStorage.getItem("movie_app_user") || "null"), token: localStorage.getItem("movie_app_token") || null, error: null },
+  reducers: {
+    signup: (state, action) => {
+      const users = JSON.parse(localStorage.getItem("movie_app_users") || "[]");
+      const exists = users.find(u => u.email === action.payload.email);
+      if (exists) { state.error = "Email already registered"; return; }
+      users.push(action.payload);
+      localStorage.setItem("movie_app_users", JSON.stringify(users));
+      state.user = { name: action.payload.name, email: action.payload.email };
+      state.token = btoa(action.payload.email + ":" + Date.now());
+      localStorage.setItem("movie_app_user", JSON.stringify(state.user));
+      localStorage.setItem("movie_app_token", state.token);
+    },
+    login: (state, action) => {
+      const users = JSON.parse(localStorage.getItem("movie_app_users") || "[]");
+      const user = users.find(u => u.email === action.payload.email && u.password === action.payload.password);
+      if (!user) { state.error = "Invalid credentials"; return; }
+      state.user = { name: user.name, email: user.email };
+      state.token = btoa(user.email + ":" + Date.now());
+      localStorage.setItem("movie_app_user", JSON.stringify(state.user));
+      localStorage.setItem("movie_app_token", state.token);
+      state.error = null;
+    },
+    logout: (state) => {
+      state.user = null;
+      state.token = null;
+      localStorage.removeItem("movie_app_user");
+      localStorage.removeItem("movie_app_token");
+    },
+    clearError: (state) => { state.error = null; }
+  }
+});
+
+const moviesSlice = createSlice({
+  name: "movies",
+  initialState: { query: "", page: 1, total_pages: 0, results: [], cache: {}, isLoading: false, isError: false, selected: null, favorites: JSON.parse(localStorage.getItem("movie_app_favorites") || "[]"), watchlist: JSON.parse(localStorage.getItem("movie_app_watchlist") || "[]"), bookings: JSON.parse(localStorage.getItem("movie_app_bookings") || "[]") },
+  reducers: {
+    setQuery: (state, action) => { state.query = action.payload; state.page = 1; },
+    setPage: (state, action) => { state.page = action.payload; },
+    toggleFavorite: (state, action) => {
+      const id = action.payload.id;
+      const exists = state.favorites.find(f => f.id === id);
+      if (exists) state.favorites = state.favorites.filter(f => f.id !== id); else state.favorites.push(action.payload);
+      localStorage.setItem("movie_app_favorites", JSON.stringify(state.favorites));
+    },
+    toggleWatchlist: (state, action) => {
+      const id = action.payload.id;
+      const exists = state.watchlist.find(w => w.id === id);
+      if (exists) state.watchlist = state.watchlist.filter(w => w.id !== id); else state.watchlist.push(action.payload);
+      localStorage.setItem("movie_app_watchlist", JSON.stringify(state.watchlist));
+    },
+    addBooking: (state, action) => {
+      state.bookings.push(action.payload);
+      localStorage.setItem("movie_app_bookings", JSON.stringify(state.bookings));
+    },
+    clearResults: (state) => { state.results = []; state.page = 1; state.total_pages = 0; },
+    selectMovieLocal: (state, action) => { state.selected = action.payload; }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchMovies.pending, (state) => { state.isLoading = true; state.isError = false })
+      .addCase(fetchMovies.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.results = action.payload.results || [];
+        state.page = action.payload.page || 1;
+        state.total_pages = action.payload.total_pages || 0;
+        state.cache[state.query + ":" + state.page] = action.payload;
+      })
+      .addCase(fetchMovies.rejected, (state) => { state.isLoading = false; state.isError = true })
+      .addCase(fetchMovieDetails.pending, (state) => { state.isLoading = true })
+      .addCase(fetchMovieDetails.fulfilled, (state, action) => { state.isLoading = false; state.selected = action.payload })
+      .addCase(fetchMovieDetails.rejected, (state) => { state.isLoading = false; state.isError = true });
+  }
+});
+
+const { signup, login, logout, clearError } = authSlice.actions;
+const { setQuery, setPage, toggleFavorite, toggleWatchlist, addBooking, clearResults, selectMovieLocal } = moviesSlice.actions;
+
+const store = configureStore({ reducer: { auth: authSlice.reducer, movies: moviesSlice.reducer } });
+
+function useDebouncedValue(value, delay = 500) {
+  const [v, setV] = useState(value);
+  useEffect(() => {
+    const id = setTimeout(() => setV(value), delay);
+    return () => clearTimeout(id);
+  }, [value, delay]);
+  return v;
+}
+
+function AuthControls() {
+  const dispatch = useDispatch();
+  const { user, error } = useSelector(s => s.auth);
+  const [mode, setMode] = useState("login");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  return (
+    <Box w="100%" p={3} borderWidth={1} borderRadius="md">
+      {!user ? (
+        <VStack spacing={3} align="stretch">
+          <HStack>
+            <Button onClick={() => setMode("login")} colorScheme={mode === "login" ? "teal" : "gray"}>Login</Button>
+            <Button onClick={() => setMode("signup")} colorScheme={mode === "signup" ? "teal" : "gray"}>Sign Up</Button>
+          </HStack>
+          {mode === "signup" && <Input placeholder="Name" value={name} onChange={e => setName(e.target.value)} />}
+          <Input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
+          <Input placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} />
+          <HStack>
+            <Button colorScheme="teal" onClick={() => { if (mode === "signup") dispatch(signup({ name, email, password })); else dispatch(login({ email, password })); }}>Submit</Button>
+            <Button onClick={() => { setName(""); setEmail(""); setPassword(""); dispatch(clearError()); }}>Reset</Button>
+          </HStack>
+          {error && <Text color="red.500">{error}</Text>}
+        </VStack>
+      ) : (
+        <HStack>
+          <Text>Welcome, {user.name}</Text>
+          <Spacer />
+          <Button colorScheme="red" onClick={() => dispatch(logout())}>Logout</Button>
+        </HStack>
+      )}
+    </Box>
+  );
+}
+
+function SearchBar() {
+  const dispatch = useDispatch();
+  const query = useSelector(s => s.movies.query);
+  const [local, setLocal] = useState(query);
+  const deb = useDebouncedValue(local, 600);
+  useEffect(() => { dispatch(setQuery(deb)); if (deb) dispatch(fetchMovies({ query: deb, page: 1 })); else dispatch(clearResults()); }, [deb, dispatch]);
+  return (
+    <HStack w="100%">
+      <Input placeholder="Search movies..." value={local} onChange={e => setLocal(e.target.value)} />
+      <Select w="200px" onChange={e => dispatch(setPage(Number(e.target.value)))} placeholder="Page">
+        <option value="1">Page 1</option>
+        <option value="2">Page 2</option>
+        <option value="3">Page 3</option>
+      </Select>
+    </HStack>
+  );
+}
+
+function MovieCard({ movie, onOpenDetails }) {
+  const dispatch = useDispatch();
+  const favs = useSelector(s => s.movies.favorites);
+  const watch = useSelector(s => s.movies.watchlist);
+  const isFav = favs.some(f => f.id === movie.id);
+  const inWatch = watch.some(w => w.id === movie.id);
+  return (
+    <Box borderWidth={1} borderRadius="md" p={3}>
+      <VStack align="start">
+        <HStack w="100%">
+          <Image src={movie.poster_path ? `https://image.tmdb.org/t/p/w200${movie.poster_path}` : ""} boxSize="80px" objectFit="cover" alt={movie.title} />
+          <Box>
+            <Text fontWeight="bold">{movie.title}</Text>
+            <Text fontSize="sm">{movie.release_date}</Text>
+            <Badge>{movie.vote_average} ★</Badge>
+          </Box>
+          <Spacer />
+          <VStack>
+            <IconButton aria-label="fav" icon={<StarIcon />} colorScheme={isFav ? "yellow" : "gray"} onClick={() => dispatch(toggleFavorite(movie))} />
+            <Button size="sm" onClick={() => dispatch(toggleWatchlist(movie))} colorScheme={inWatch ? "orange" : "blue"}>{inWatch ? "In Watchlist" : "Watchlist"}</Button>
+          </VStack>
+        </HStack>
+        <HStack w="100%" justify="flex-end">
+          <Button size="sm" onClick={() => onOpenDetails(movie.id)}>Details</Button>
+        </HStack>
+      </VStack>
+    </Box>
+  );
+}
+
+function MovieGrid({ onOpenDetails }) {
+  const { results, isLoading, page, total_pages } = useSelector(s => s.movies);
+  const dispatch = useDispatch();
+  if (isLoading) return <Text>Loading...</Text>;
+  if (!results.length) return <Text>No results</Text>;
+  return (
+    <VStack w="100%" align="stretch">
+      <SimpleGrid columns={[1,2,3]} spacing={4}>
+        {results.map(m => <MovieCard key={m.id} movie={m} onOpenDetails={onOpenDetails} />)}
+      </SimpleGrid>
+      <HStack justify="center" mt={3}>
+        <Button onClick={() => dispatch(setPage(Math.max(1, page - 1)))} disabled={page <= 1}>Prev</Button>
+        <Text>Page {page} / {total_pages || 1}</Text>
+        <Button onClick={() => dispatch(setPage(Math.min(total_pages || 1, page + 1)))} disabled={page >= (total_pages || 1)}>Next</Button>
+      </HStack>
+    </VStack>
+  );
+}
+
+function MovieDetailsModal({ isOpen, onClose, movieId }) {
+  const dispatch = useDispatch();
+  const movie = useSelector(s => s.movies.selected);
+  useEffect(() => { if (isOpen && movieId) dispatch(fetchMovieDetails(movieId)); }, [isOpen, movieId, dispatch]);
+  const auth = useSelector(s => s.auth.user);
+  const { isOpen: bookOpen, onOpen: onOpenBook, onClose: onCloseBook } = useDisclosure();
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} size="xl">
+      <ModalOverlay />
+      <ModalContent>
+        <ModalHeader>{movie?.title}</ModalHeader>
+        <ModalBody>
+          <HStack align="start">
+            <Image src={movie?.poster_path ? `https://image.tmdb.org/t/p/w300${movie.poster_path}` : ""} boxSize="200px" objectFit="cover" />
+            <VStack align="start">
+              <Text>{movie?.overview}</Text>
+              <Text>Runtime: {movie?.runtime} mins</Text>
+              <Text>Genres: {movie?.genres?.map(g => g.name).join(", ")}</Text>
+              <Text>Cast: {movie?.credits?.cast?.slice(0,5).map(c => c.name).join(", ")}</Text>
+            </VStack>
+          </HStack>
+        </ModalBody>
+        <ModalFooter>
+          <Button colorScheme="teal" mr={3} onClick={() => { if (!auth) { alert("Login to book"); return; } onOpenBook(); }}>Book</Button>
+          <Button onClick={onClose}>Close</Button>
+        </ModalFooter>
+      </ModalContent>
+      <BookingModal isOpen={bookOpen} onClose={onCloseBook} movie={movie} />
+    </Modal>
+  );
+}
+
+function BookingModal({ isOpen, onClose, movie }) {
+  const [seats, setSeats] = useState([]);
+  const [name, setName] = useState("");
+  const dispatch = useDispatch();
+  useEffect(() => { setSeats([]); setName(""); }, [movie, isOpen]);
+  const toggleSeat = (s) => setSeats(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
+  const confirm = () => {
+    if (!seats.length) { alert("Select seats"); return; }
+    dispatch(addBooking({ id: Date.now(), movieId: movie.id, movieTitle: movie.title, seats, name: name || "Guest", date: new Date().toISOString() }));
+    onClose();
+    alert("Booking confirmed");
+  };
+  const seatLayout = useMemo(() => Array.from({ length: 30 }, (_, i) => i + 1), []);
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} size="md">
+      <ModalOverlay />
+      <ModalContent>
+        <ModalHeader>Book: {movie?.title}</ModalHeader>
+        <ModalBody>
+          <VStack align="start">
+            <Text>Select seats:</Text>
+            <Grid templateColumns="repeat(6, 1fr)" gap={2} w="100%">
+              {seatLayout.map(s => <Button key={s} size="sm" colorScheme={seats.includes(s) ? "green" : "gray"} onClick={() => toggleSeat(s)}>{s}</Button>)}
+            </Grid>
+            <Input placeholder="Name for booking" value={name} onChange={e => setName(e.target.value)} />
+            <Text>Selected: {seats.join(", ") || "None"}</Text>
+          </VStack>
+        </ModalBody>
+        <ModalFooter>
+          <Button colorScheme="teal" onClick={confirm}>Confirm</Button>
+          <Button onClick={onClose}>Close</Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
+  );
+}
+
+function Sidebar() {
+  const favorites = useSelector(s => s.movies.favorites);
+  const watchlist = useSelector(s => s.movies.watchlist);
+  const bookings = useSelector(s => s.movies.bookings);
+  const auth = useSelector(s => s.auth.user);
+  return (
+    <VStack align="stretch" spacing={4} w="300px">
+      <Box borderWidth={1} borderRadius="md" p={3}>
+        <Heading size="sm" mb={2}>User</Heading>
+        {auth ? <Text>{auth.name} ({auth.email})</Text> : <Text>Not logged in</Text>}
+      </Box>
+      <Box borderWidth={1} borderRadius="md" p={3}>
+        <Heading size="sm" mb={2}>Favorites</Heading>
+        <VStack align="start">{favorites.length ? favorites.map(f => <Text key={f.id}>{f.title}</Text>) : <Text>No favorites</Text>}</VStack>
+      </Box>
+      <Box borderWidth={1} borderRadius="md" p={3}>
+        <Heading size="sm" mb={2}>Watchlist</Heading>
+        <VStack align="start">{watchlist.length ? watchlist.map(w => <Text key={w.id}>{w.title}</Text>) : <Text>Empty</Text>}</VStack>
+      </Box>
+      <Box borderWidth={1} borderRadius="md" p={3}>
+        <Heading size="sm" mb={2}>Bookings</Heading>
+        <VStack align="start">{bookings.length ? bookings.map(b => <Text key={b.id}>{b.movieTitle} ({b.seats.length} seats)</Text>) : <Text>No bookings</Text>}</VStack>
+      </Box>
+    </VStack>
+  );
+}
+
+function MainApp() {
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
+  const dispatch = useDispatch();
+  const moviesState = useSelector(s => s.movies);
+  const openDetails = useCallback((id) => { setSelectedId(id); setDetailsOpen(true); dispatch(selectMovieLocal(null)); }, [dispatch]);
+  useEffect(() => { if (moviesState.page && moviesState.query) dispatch(fetchMovies({ query: moviesState.query, page: moviesState.page })); }, [moviesState.page, moviesState.query, dispatch]);
+  return (
+    <HStack align="start" spacing={4} w="100%" flexWrap="wrap">
+      <VStack spacing={4} flex="1" minW="320px">
+        <SearchBar />
+        <MovieGrid onOpenDetails={openDetails} />
+      </VStack>
+      <Sidebar />
+      <MovieDetailsModal isOpen={detailsOpen} onClose={() => setDetailsOpen(false)} movieId={selectedId} />
+    </HStack>
+  );
+}
+
+function AppShell() {
+  return (
+    <ChakraProvider>
+      <Provider store={store}>
+        <Box p={5} maxW="1200px" mx="auto">
+          <Heading mb={4}>Movie Explorer</Heading>
+          <HStack align="start" spacing={4}>
+            <Box flex="1">
+              <AuthControls />
+              <MainApp />
+            </Box>
+          </HStack>
+        </Box>
+      </Provider>
+    </ChakraProvider>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<AppShell />);
