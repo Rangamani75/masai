@@ -1,0 +1,82 @@
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+
+const markerIcon = new L.Icon({
+  iconUrl: "https://unpkg.com/leaflet@1.7/dist/images/marker-icon.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+});
+
+const LocationMarker = React.memo(({ position, label }) => {
+  return (
+    <Marker position={position} icon={markerIcon}>
+      <Popup>{label}</Popup>
+    </Marker>
+  );
+});
+
+function ChangeMapView({ coords }) {
+  const map = useMap();
+  useEffect(() => {
+    if (coords) map.setView(coords, 13);
+  }, [coords, map]);
+  return null;
+}
+
+export default function App() {
+  const [currentLocation, setCurrentLocation] = useState(null);
+  const [destination, setDestination] = useState("");
+  const [markers, setMarkers] = useState([]);
+
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition((pos) => {
+      setCurrentLocation([pos.coords.latitude, pos.coords.longitude]);
+    });
+  }, []);
+
+  const addDestination = useCallback(() => {
+    if (!destination) return;
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${destination}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.length > 0) {
+          const { lat, lon } = data[0];
+          setMarkers((prev) => [
+            ...prev,
+            { coords: [parseFloat(lat), parseFloat(lon)], label: destination },
+          ]);
+          setDestination("");
+        }
+      });
+  }, [destination]);
+
+  const memoMarkers = useMemo(
+    () =>
+      markers.map((m, i) => (
+        <LocationMarker key={i} position={m.coords} label={m.label} />
+      )),
+    [markers]
+  );
+
+  return (
+    <div>
+      <h1>Optimised Map Application</h1>
+      <input
+        value={destination}
+        onChange={(e) => setDestination(e.target.value)}
+        placeholder="Search location"
+      />
+      <button onClick={addDestination}>Add</button>
+      {currentLocation && (
+        <MapContainer center={currentLocation} zoom={13} style={{ height: "500px" }}>
+          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          <ChangeMapView coords={currentLocation} />
+          <LocationMarker position={currentLocation} label="Current Location" />
+          {memoMarkers}
+        </MapContainer>
+      )}
+    </div>
+  );
+}
