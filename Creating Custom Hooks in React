@@ -1,0 +1,55 @@
+import React, { useState } from "react";
+
+function useForm(initialValues) {
+  const [values, setValues] = useState(initialValues);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setValues((prev) => ({ ...prev, [name]: value }));
+  };
+  const resetForm = () => setValues(initialValues);
+  return { values, handleChange, resetForm };
+}
+
+function ContactForm() {
+  const { values, handleChange, resetForm } = useForm({ name: "", email: "" });
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    alert(`Contact: ${values.name}, ${values.email}`);
+    resetForm();
+  };
+  return (
+    <form onSubmit={handleSubmit}>
+      <h3>Contact Form</h3>
+      <input name="name" value={values.name} onChange={handleChange} placeholder="Name" />
+      <input name="email" value={values.email} onChange={handleChange} placeholder="Email" />
+      <button type="submit">Submit</button>
+    </form>
+  );
+}
+
+function LoginForm() {
+  const { values, handleChange, resetForm } = useForm({ username: "", password: "" });
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    alert(`Login: ${values.username}, ${values.password}`);
+    resetForm();
+  };
+  return (
+    <form onSubmit={handleSubmit}>
+      <h3>Login Form</h3>
+      <input name="username" value={values.username} onChange={handleChange} placeholder="Username" />
+      <input name="password" value={values.password} onChange={handleChange} placeholder="Password" type="password" />
+      <button type="submit">Login</button>
+    </form>
+  );
+}
+
+export default function App() {
+  return (
+    <div style={{ padding: "20px" }}>
+      <ContactForm />
+      <hr />
+      <LoginForm />
+    </div>
+  );
+}
