@@ -1,0 +1,88 @@
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Link, Navigate, useNavigate, useParams } from "react-router-dom";
+
+const AuthContext = createContext(null);
+export function useAuth() {
+  return useContext(AuthContext);
+}
+
+function AuthProvider({ children }) {
+  const [user, setUser] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("pt_user")) || null;
+    } catch (e) {
+      return null;
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem("pt_user", JSON.stringify(user));
+  }, [user]);
+
+  const login = (email, password) => {
+ 
+    const fakeUser = { email };
+    setUser(fakeUser);
+    return true;
+  };
+
+  const signup = (email, password) => {
+  
+    const fakeUser = { email };
+    setUser(fakeUser);
+    return true;
+  };
+
+  const logout = () => setUser(null);
+
+  const value = { user, login, signup, logout };
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+function useProjects() {
+  const [projects, setProjects] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("pt_projects")) || [];
+    } catch (e) {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem("pt_projects", JSON.stringify(projects));
+  }, [projects]);
+
+  function addProject(project) {
+    const id = Date.now().toString();
+    setProjects((p) => [...p, { ...project, id, tasks: project.tasks || [] }]);
+  }
+
+  function updateProject(id, updates) {
+    setProjects((p) => p.map((proj) => (proj.id === id ? { ...proj, ...updates } : proj)));
+  }
+
+  function deleteProject(id) {
+    setProjects((p) => p.filter((proj) => proj.id !== id));
+  }
+
+  function addTask(projectId, task) {
+    setProjects((p) =>
+      p.map((proj) => (proj.id === projectId ? { ...proj, tasks: [...proj.tasks, { ...task, id: Date.now().toString() }] } : proj))
+    );
+  }
+
+  function toggleTask(projectId, taskId) {
+    setProjects((p) =>
+      p.map((proj) =>
+        proj.id === projectId
+          ? { ...proj, tasks: proj.tasks.map((t) => (t.id === taskId ? { ...t, done: !t.done } : t)) }
+          : proj
+      )
+    );
+  }
+
+  function deleteTask(projectId, taskId) {
+    setProjects((p) => p.map((proj) => (proj.id === projectId ? { ...proj, tasks: proj.tasks.filter((t) => t.id !== taskId) } : proj)));
+  }
+
+  return { projects, addProject, updateProject, deleteProject, addTask, toggleTask, deleteTask };
+}
