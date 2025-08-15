@@ -1,0 +1,47 @@
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+
+const Post = React.memo(({ id, title, body, verifyPost, onToggle }) => {
+  const bgColor = useMemo(() => `hsl(${Math.floor(Math.random() * 360)},70%,80%)`, []);
+  return (
+    <div style={{ backgroundColor: bgColor, padding: "10px", margin: "10px 0" }}>
+      <h3>{title}</h3>
+      <p>{body}</p>
+      <p>Status: {verifyPost ? "Verified" : "Verify"}</p>
+      <button onClick={() => onToggle(id)}>{verifyPost ? "Unverify" : "Verify"}</button>
+    </div>
+  );
+});
+
+export default function App() {
+  const [timer, setTimer] = useState(0);
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [posts, setPosts] = useState([]);
+  useEffect(() => {
+    const interval = setInterval(() => setTimer((t) => t + 1), 1000);
+    return () => clearInterval(interval);
+  }, []);
+  const addPost = () => {
+    setPosts((prev) => [...prev, { id: Date.now(), title, body, verifyPost: false }]);
+    setTitle("");
+    setBody("");
+  };
+  const toggleVerify = useCallback((id) => {
+    setPosts((prev) =>
+      prev.map((post) =>
+        post.id === id ? { ...post, verifyPost: !post.verifyPost } : post
+      )
+    );
+  }, []);
+  return (
+    <div>
+      <h1>Timer: {timer}</h1>
+      <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" />
+      <input value={body} onChange={(e) => setBody(e.target.value)} placeholder="Body" />
+      <button onClick={addPost}>Add Post</button>
+      {posts.map((post) => (
+        <Post key={post.id} {...post} onToggle={toggleVerify} />
+      ))}
+    </div>
+  );
+}
